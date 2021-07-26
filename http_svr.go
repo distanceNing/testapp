@@ -1,8 +1,8 @@
 package awesomeProject
 
 import (
-	"./login"
-	"./utils"
+	"github.com/distanceNing/testapp/login"
+	"github.com/distanceNing/testapp/utils"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"log"

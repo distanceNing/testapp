@@ -1,4 +1,4 @@
-module awesomeProject
+module github.com/distanceNing/testapp
 
 go 1.16
 

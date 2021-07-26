@@ -1,9 +1,9 @@
 package login
 
 import (
-	"../comm"
-	"../utils"
 	"encoding/json"
+	"github.com/distanceNing/testapp/comm"
+	"github.com/distanceNing/testapp/utils"
 	"log"
 	"net/http"
 	"sync"
@@ -33,9 +33,9 @@ type AuthReply struct {
 }
 
 var wxAuthUrl = "https://api.weixin.qq.com/sns/jscode2session"
-var wxAppid = "wx8ca41413f93c8be3"
+var wxAppid = "xx"
 var grantType = "authorization_code"
-var secretId = "bc19f46d4f2ac3ddfe9d4145e56fc0f5"
+var secretId = "xx"
 
 func (ul *UserLogin) Login(code string) comm.Status {
 	status := comm.NewStatus()
