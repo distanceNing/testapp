@@ -1,4 +1,4 @@
-package utils
+package common
 
 import (
 	"crypto/aes"
@@ -20,8 +20,8 @@ func VerifySignBySha1(data string, sign string) bool {
 	h.Write([]byte(data))
 	//这个用来得到最终的散列值的字符切片。Sum 的参数可以用来都现有的字符切片追加额外的字节切片：一般不需要要。
 	bs := h.Sum(nil)
-	encode_bs := hex.EncodeToString(bs)
-	return encode_bs == sign;
+	encodeBs := hex.EncodeToString(bs)
+	return encodeBs == sign;
 }
 
 // var appId = "wx4f4bc4dec97d474b"

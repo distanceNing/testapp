@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/distanceNing/testapp/conf"
-	"github.com/distanceNing/testapp/login"
+	"github.com/distanceNing/testapp/logic"
 	"github.com/distanceNing/testapp/repo"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
@@ -33,7 +33,7 @@ func SayHello(w http.ResponseWriter, request *http.Request) {
 	var code = request.URL.Query().Get("code")
 	// GET https://api.weixin.qq.com/sns/jscode2session?
 	// appid=APPID&secret=SECRET&js_code=JSCODE&grant_type=authorization_code
-	user_login := login.UserLogin{}
+	user_login := logic.UserLogin{}
 	user_login.Login(code)
 
 	file := "return_txt.log"
@@ -59,12 +59,12 @@ func SayHello(w http.ResponseWriter, request *http.Request) {
 }
 
 func loginOp() {
-	ul := login.UserLogin{}
+	ul := logic.UserLogin{}
 	ul.Init()
 	gin.ForceConsoleColor()
 
 	r := gin.Default()
-	r.GET("/login", func(c *gin.Context) {
+	r.GET("/logic", func(c *gin.Context) {
 		code := c.Request.URL.Query().Get("code")
 		status := ul.Login(code)
 		c.JSON(200, gin.H{
@@ -74,7 +74,7 @@ func loginOp() {
 	})
 
 	r.GET("/auth", func(c *gin.Context) {
-		auth_req := login.AuthRequest{Signature: c.Query("signature"),
+		auth_req := logic.AuthRequest{Signature: c.Query("signature"),
 			Code:          c.Query("code"),
 			EncryptedData: c.Query("encryptedData"),
 			Iv:            c.Query("iv"),

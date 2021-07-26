@@ -1,4 +1,4 @@
-package comm
+package common
 
 type Status struct {
 	code int

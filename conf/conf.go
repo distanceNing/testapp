@@ -1,7 +1,7 @@
 package conf
 
 import (
-	"github.com/distanceNing/testapp/comm"
+	"github.com/distanceNing/testapp/common"
 	"gopkg.in/yaml.v2"
 	"log"
 	"os"
@@ -22,8 +22,8 @@ type ServerConf struct {
 	DbConf  DbConf  `yaml:"dbconf"`
 }
 
-func ReadConf(confPath string) (comm.Status, *ServerConf) {
-	status := comm.NewStatus()
+func ReadConf(confPath string) (common.Status, *ServerConf) {
+	status := common.NewStatus()
 	f, err := os.Open(confPath)
 	if err != nil {
 		status.Set(-1, "open file : "+err.Error())

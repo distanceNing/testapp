@@ -1,9 +1,8 @@
-package login
+package logic
 
 import (
 	"encoding/json"
-	"github.com/distanceNing/testapp/comm"
-	"github.com/distanceNing/testapp/utils"
+	"github.com/distanceNing/testapp/common"
 	"log"
 	"net/http"
 	"sync"
@@ -37,8 +36,8 @@ var wxAppid = "xx"
 var grantType = "authorization_code"
 var secretId = "xx"
 
-func (ul *UserLogin) Login(code string) comm.Status {
-	status := comm.NewStatus()
+func (ul *UserLogin) Login(code string) common.Status {
+	status := common.NewStatus()
 	req, err := http.NewRequest("GET", wxAuthUrl, nil)
 	if err != nil {
 		log.Println(err.Error())
@@ -99,8 +98,8 @@ type UserInfo struct {
 	Watermark WaterMark
 }
 
-func (ul *UserLogin) Auth(req *AuthRequest) comm.Status {
-	status := comm.NewStatus()
+func (ul *UserLogin) Auth(req *AuthRequest) common.Status {
+	status := common.NewStatus()
 	ul.mutex.Lock()
 	info, ok := ul.userSessions [ req.Code ]
 	ul.mutex.Unlock()
@@ -109,7 +108,7 @@ func (ul *UserLogin) Auth(req *AuthRequest) comm.Status {
 		status.Set(-1, "req.code not exist");
 		return status
 	}
-	orig_data := utils.AesDecrypt(info.sessionKey, req.EncryptedData, req.Iv)
+	orig_data := common.AesDecrypt(info.sessionKey, req.EncryptedData, req.Iv)
 	var user_info UserInfo
 	err := json.Unmarshal(orig_data, &user_info)
 	if err != nil {
@@ -117,7 +116,7 @@ func (ul *UserLogin) Auth(req *AuthRequest) comm.Status {
 		return status
 	}
 	// verify sign
-	if !utils.VerifySignBySha1(req.RawData+info.sessionKey, req.Signature) {
+	if !common.VerifySignBySha1(req.RawData+info.sessionKey, req.Signature) {
 		log.Println("verify sign fail")
 		return status
 	}
