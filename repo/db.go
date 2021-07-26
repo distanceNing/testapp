@@ -1,8 +1,10 @@
-package utils
+package repo
 
 import (
+	"github.com/distanceNing/testapp/conf"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"log"
 )
 
 type Product struct {
@@ -11,8 +13,17 @@ type Product struct {
 	Price uint
 }
 
-func Testgorm() {
-	dsn := "user:root@1234@tcp(9.134.160.144:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
+
+
+func DbMigrate(){
+
+}
+
+func Testgorm(dbConf *conf.DbConf) {
+	dsn := dbConf.User + ":" + dbConf.Password + "@tcp(" + dbConf.Addr +
+		")/test?charset=utf8mb4&parseTime=True&loc=Local"
+
+	log.Println(dsn)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")

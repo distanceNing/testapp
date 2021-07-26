@@ -1,8 +1,9 @@
-package awesomeProject
+package main
 
 import (
+	"github.com/distanceNing/testapp/conf"
 	"github.com/distanceNing/testapp/login"
-	"github.com/distanceNing/testapp/utils"
+	"github.com/distanceNing/testapp/repo"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"log"
@@ -57,7 +58,7 @@ func SayHello(w http.ResponseWriter, request *http.Request) {
 	}
 }
 
-func login_op() {
+func loginOp() {
 	ul := login.UserLogin{}
 	ul.Init()
 	gin.ForceConsoleColor()
@@ -94,6 +95,11 @@ func login_op() {
 }
 
 func main() {
-	utils.Testgorm()
+	status, svrConf := conf.ReadConf("conf.yaml")
+	if !status.Ok() {
+		return
+	}
+
+	repo.Testgorm(&svrConf.DbConf)
 
 }

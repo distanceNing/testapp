@@ -9,6 +9,10 @@ func NewStatus() Status {
 	return Status{0, "ok"}
 }
 
+func (s *Status) Ok() bool {
+	return s.code == 0
+}
+
 func (s *Status) Code() int {
 	return s.code
 }
