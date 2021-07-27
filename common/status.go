@@ -1,5 +1,14 @@
 package common
 
+const (
+	ErrSystem = 1
+	ErrTokenTimeOut
+	ErrUserNotExist
+	ErrPasswordNotMatch
+	ErrJsonDecodeFail
+	ErrDbDupKey = 10
+)
+
 type Status struct {
 	code int
 	msg  string

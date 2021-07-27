@@ -2,7 +2,6 @@ package conf
 
 import (
 	"github.com/distanceNing/testapp/common"
-	"gopkg.in/yaml.v2"
 	"log"
 	"os"
 )
@@ -13,8 +12,15 @@ type DbConf struct {
 	Password string `yaml:"password"`
 }
 
+type RedisConf struct {
+	Addr     string `yaml:"addr"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+}
+
 type AppConf struct {
 	Name string `yaml:"name"`
+	Addr string `yaml:"addr"`
 }
 
 type ServerConf struct {

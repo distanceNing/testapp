@@ -7,45 +7,38 @@ import (
 	"log"
 )
 
-type Product struct {
-	gorm.Model
-	Code  string
-	Price uint
+type DbInstance struct {
+	dsn string
+	db  *gorm.DB
 }
 
+var Storage *DbInstance
 
-
-func DbMigrate(){
-
+func GetDefaultTestDb() {
+	dbconf := conf.DbConf{"127.0.0.1:3306", "root", "DLJn@123456!"}
+	_ = InitStorage(&dbconf)
 }
 
-func Testgorm(dbConf *conf.DbConf) {
+func InitStorage(dbConf *conf.DbConf) error {
+	dbi, err := NewDbInstance(dbConf)
+	if err != nil {
+		return err
+	}
+	Storage = new(DbInstance)
+	Storage.db = dbi.db
+	Storage.dsn = dbi.dsn
+	err = Storage.db.AutoMigrate(&UserSession{}, &UserInfo{})
+	return err
+}
+
+func NewDbInstance(dbConf *conf.DbConf) (*DbInstance, error) {
 	dsn := dbConf.User + ":" + dbConf.Password + "@tcp(" + dbConf.Addr +
 		")/test?charset=utf8mb4&parseTime=True&loc=Local"
 
-	log.Println(dsn)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		panic("failed to connect database")
+		log.Println("failed to connect database" + err.Error())
+		return nil, err
 	}
-
-	// 迁移 schema
-	_ = db.AutoMigrate(&Product{})
-
-	// Create
-	db.Create(&Product{Code: "D42", Price: 100})
-
-	// Read
-	var product Product
-	db.First(&product, 1)                 // 根据整形主键查找
-	db.First(&product, "code = ?", "D42") // 查找 code 字段值为 D42 的记录
-
-	// Update - 将 product 的 price 更新为 200
-	db.Model(&product).Update("Price", 200)
-	// Update - 更新多个字段
-	db.Model(&product).Updates(Product{Price: 200, Code: "F42"}) // 仅更新非零值字段
-	db.Model(&product).Updates(map[string]interface{}{"Price": 200, "Code": "F42"})
-
-	// Delete - 删除 product
-	db.Delete(&product, 1)
+	return &DbInstance{dsn, db}, nil
 }

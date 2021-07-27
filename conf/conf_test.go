@@ -18,7 +18,7 @@ func TestReadConf(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := ReadConf(tt.args.confPath)
+			got, _ := ReadConf(tt.args.confPath)
 			if !reflect.DeepEqual(got.Code(), tt.want) {
 				t.Errorf("ReadConf() got = %v, want %v", got, tt.want)
 			}
