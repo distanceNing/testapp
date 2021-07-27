@@ -2,6 +2,7 @@ package conf
 
 import (
 	"github.com/distanceNing/testapp/common"
+	"gopkg.in/yaml.v2"
 	"log"
 	"os"
 )
