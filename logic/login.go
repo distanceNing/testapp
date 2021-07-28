@@ -2,41 +2,43 @@ package logic
 
 import (
 	"github.com/distanceNing/testapp/common"
+	"github.com/distanceNing/testapp/conf"
 	"github.com/distanceNing/testapp/repo"
-	"strings"
 	"time"
 )
 
-const TokenTimeOut = 2 * 60
+const TokenTimeOut = 60 * 60
+
+var UserTypeMap = map[string]int{"teacher": 0, "manager": 1}
 
 type LoginRequest struct {
 	UserId   string `json:"userId"`
 	Password string `json:"password"`
 	UserType string `json:"userType"`
+	Email    string `json:"email"`
+	NickName string `json:"nickName"`
 }
 
 type LoginService struct {
+	sessionMgr *SessionManager
 }
 
-func NewLoginService() *LoginService {
-	return &LoginService{}
+func NewLoginService(conf *conf.RedisConf) *LoginService {
+	return &LoginService{NewSessionManager(conf)}
 }
 
-func genLoginToken() string {
-	return strings.ToUpper(common.RandString(16))
-}
-
-func (loginSvc *LoginService) checkSessionToken(userId string) common.Status {
-	status := common.NewStatus()
-	var session repo.UserSession
-	status, session = repo.QuerySessionToken(userId)
-	if !status.Ok() {
+// Login
+func (loginSvc *LoginService) Register(req *LoginRequest, rsp *common.Rsp) common.Status {
+	status, _ := repo.QueryUserInfo(req.UserId)
+	if status.Ok() {
+		status.Set(common.ErrUserAlreadyExist, "user already exist")
+		return status
+	} else if status.Code() != common.ErrUserNotExist {
 		return status
 	}
-
-	d := time.Since(session.CreatedAt)
-	if d.Seconds() > TokenTimeOut {
-		status.Set(common.ErrTokenTimeOut, "token time out")
+	status = repo.CreateObject(&repo.UserInfo{req.UserId, req.NickName, UserTypeMap[req.UserType],
+		req.Password, req.Email, time.Now(), time.Now()})
+	if !status.Ok() {
 		return status
 	}
 	return status
@@ -52,19 +54,22 @@ func (loginSvc *LoginService) Login(req *LoginRequest, rsp *common.Rsp) common.S
 		status.Set(common.ErrPasswordNotMatch, "user password not match")
 		return status
 	}
-
-	token := genLoginToken()
-	status = repo.CreateSession(req.UserId, token)
-	if !status.Ok() && status.Code() != common.ErrDbDupKey {
-		status.Set(common.ErrSystem, "proc failed")
+	var token string
+	status, token = loginSvc.sessionMgr.CreateSession(req.UserId)
+	if !status.Ok() {
 		return status
 	}
-	if status.Code() == common.ErrDbDupKey {
-		status = repo.UpdateSessionToken(req.UserId, token)
-		if !status.Ok() {
-			return status
-		}
-	}
 	rsp.Set("token", token)
+	return status
+}
+
+func (loginSvc *LoginService) CheckSessionToken(userId string, token string) common.Status {
+	status, tokenInSvr := loginSvc.sessionMgr.QuerySessionToken(userId)
+	if !status.Ok() {
+		return status
+	}
+	if token != tokenInSvr {
+		status.Set(common.ErrTokenNotMatch, "req token not match in svr")
+	}
 	return status
 }

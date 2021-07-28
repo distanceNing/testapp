@@ -8,21 +8,22 @@ import (
 )
 
 type UserInfo struct {
-	UserId       string `gorm:"primarykey"`
+	UserId       string `gorm:"primaryKey"`
+	NickName     string
 	UserType     int
 	UserPassword string
+	Email        string
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
 
-func CreateUser(userId string, userType int, password string) common.Status {
-	status := common.NewStatus()
-	res := Storage.db.Create(&UserInfo{userId, userType, password, time.Now(), time.Now()})
-	if res.RowsAffected == 0 {
-		status.Set(common.ErrDbDupKey, "insert dup key")
-		return status
-	}
-	return status
+type ArticleInfo struct {
+	Id        int `gorm:"primaryKey:autoIncrement"`
+	Title     string
+	Content   string
+	Status    int
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 func QueryUserInfo(userId string) (common.Status, UserInfo) {
@@ -37,41 +38,31 @@ func QueryUserInfo(userId string) (common.Status, UserInfo) {
 	return status, userInfo
 }
 
+func CreateObject(obj interface{}) common.Status {
+	status := common.NewStatus()
+	res := Storage.db.Create(obj)
+	if res.RowsAffected == 0 {
+		status.Set(common.ErrDbDupKey, "insert dup key")
+		return status
+	}
+	return status
+}
+
+func UpdateObject(cond interface{}, updateField interface{}) common.Status {
+	status := common.NewStatus()
+	res := Storage.db.Model(cond).Updates(updateField)
+	if res.RowsAffected == 0 {
+		status.Set(common.ErrNoAffected, "db update op affected 0 row")
+		return status
+	}
+	return status
+
+}
+
 type UserSession struct {
 	UserId    string `gorm:"primarykey"`
 	TokenId   string
 	CreatedAt time.Time
-}
-
-func CreateSession(userId string, token string) common.Status {
-	status := common.NewStatus()
-	res := Storage.db.Create(&UserSession{userId, token, time.Now()})
-	if res.RowsAffected == 0 {
-		status.Set(common.ErrDbDupKey, "insert dup key")
-		return status
-	}
-	return status
-}
-
-func QuerySessionToken(userId string) (common.Status, UserSession) {
-	var session UserSession
-	status := common.NewStatus()
-	res := Storage.db.Where(&UserSession{UserId: userId}).First(&session)
-	if res.Error != nil {
-		status.Set(common.ErrSystem, "query session failed")
-		return status, session
-	}
-	return status, session
-}
-
-func UpdateSessionToken(userId string, token string) common.Status {
-	status := common.NewStatus()
-	res := Storage.db.Save(&UserSession{userId, token, time.Now()})
-	if res.RowsAffected == 0 {
-		status.Set(common.ErrDbDupKey, "insert dup key")
-		return status
-	}
-	return status
 }
 
 func DeleteSession(userId string) common.Status {

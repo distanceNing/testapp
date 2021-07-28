@@ -4,9 +4,12 @@ const (
 	ErrSystem = 1
 	ErrTokenTimeOut
 	ErrUserNotExist
+	ErrUserAlreadyExist
 	ErrPasswordNotMatch
+	ErrTokenNotMatch
 	ErrJsonDecodeFail
 	ErrDbDupKey = 10
+	ErrNoAffected
 )
 
 type Status struct {

@@ -6,10 +6,13 @@ import (
 )
 
 type RedisInstance struct {
-	redisCli *redis.Client
+	RedisCli *redis.Client
 }
 
-func NewRedisInstance(conf *conf.RedisConf) *RedisInstance {
-	return &RedisInstance{redis.NewClient(&redis.Options{Addr: conf.Addr, Password: "", DB: 0,})}
+func NewRedisInstance(rConf *conf.RedisConf) *RedisInstance {
+	return &RedisInstance{redis.NewClient(&redis.Options{Addr: rConf.Addr, Password: rConf.Password, DB: 0,})}
 }
 
+func GetDefaultRedis() *RedisInstance {
+	return NewRedisInstance(&conf.RedisConf{Addr: "127.0.0.1:6379", Password: "123"})
+}

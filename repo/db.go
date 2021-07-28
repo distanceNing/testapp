@@ -27,7 +27,7 @@ func InitStorage(dbConf *conf.DbConf) error {
 	Storage = new(DbInstance)
 	Storage.db = dbi.db
 	Storage.dsn = dbi.dsn
-	err = Storage.db.AutoMigrate(&UserSession{}, &UserInfo{})
+	err = Storage.db.AutoMigrate(&UserSession{}, &UserInfo{}, &ArticleInfo{})
 	return err
 }
 

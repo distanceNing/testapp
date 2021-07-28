@@ -1,30 +1,33 @@
 package repo
 
 import (
-	"reflect"
+	"context"
 	"testing"
 
 	"github.com/distanceNing/testapp/conf"
 )
 
-
-
 func TestNewRedisInstance(t *testing.T) {
 	type args struct {
 		conf *conf.RedisConf
 	}
-	tests := []struct {
-		name string
-		args args
-		want *RedisInstance
-	}{
-		// TODO: Add test cases.
+	rdi := GetDefaultRedis()
+
+	var ctx = context.Background()
+	err := rdi.RedisCli.Set(ctx, "key1", "value1", 0).Err()
+	if err != nil {
+		panic(err)
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := NewRedisInstance(tt.args.conf); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewRedisInstance() = %v, want %v", got, tt.want)
-			}
-		})
+
+	luaScript := "return {redis.call('GET',KEYS[1])}"
+
+	res := rdi.RedisCli.Eval(ctx, luaScript, []string{"key1"})
+	if res.Err() != nil {
+		panic(err)
 	}
+
+	if res.Name() != "value1" {
+		t.Errorf("TestNewRedisInstance = %v, want %v", res.String(), "value1")
+	}
+
 }

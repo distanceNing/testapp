@@ -25,14 +25,16 @@ type AppConf struct {
 }
 
 type ServerConf struct {
-	AppConf AppConf `yaml:"appconf"`
-	DbConf  DbConf  `yaml:"dbconf"`
+	AppConf   AppConf   `yaml:"appconf"`
+	DbConf    DbConf    `yaml:"dbconf"`
+	RedisConf RedisConf `yaml:"redisconf"`
 }
 
 func ReadConf(confPath string) (common.Status, *ServerConf) {
 	status := common.NewStatus()
 	f, err := os.Open(confPath)
 	if err != nil {
+		log.Println(err.Error())
 		status.Set(-1, "open file : "+err.Error())
 		return status, nil
 	}
@@ -41,6 +43,7 @@ func ReadConf(confPath string) (common.Status, *ServerConf) {
 	SvrConf := new(ServerConf)
 	err = decoder.Decode(SvrConf)
 	if err != nil {
+		log.Println(err.Error())
 		status.Set(-1, "decode failed ,"+err.Error())
 		return status, nil
 	}
