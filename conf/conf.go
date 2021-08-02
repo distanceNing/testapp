@@ -20,8 +20,10 @@ type RedisConf struct {
 }
 
 type AppConf struct {
-	Name string `yaml:"name"`
-	Addr string `yaml:"addr"`
+	Name      string `yaml:"name"`
+	Addr      string `yaml:"addr"`
+	ImagePath string `yaml:"image_path"`
+	CdnPath   string `yaml:"cdn_path"`
 }
 
 type ServerConf struct {

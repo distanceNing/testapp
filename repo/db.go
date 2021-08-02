@@ -4,6 +4,7 @@ import (
 	"github.com/distanceNing/testapp/conf"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"log"
 )
 
@@ -27,7 +28,7 @@ func InitStorage(dbConf *conf.DbConf) error {
 	Storage = new(DbInstance)
 	Storage.db = dbi.db
 	Storage.dsn = dbi.dsn
-	err = Storage.db.AutoMigrate(&UserSession{}, &UserInfo{}, &ArticleInfo{})
+	err = Storage.db.AutoMigrate(&ImageInfo{}, &UserInfo{}, &ArticleInfo{})
 	return err
 }
 
@@ -35,7 +36,7 @@ func NewDbInstance(dbConf *conf.DbConf) (*DbInstance, error) {
 	dsn := dbConf.User + ":" + dbConf.Password + "@tcp(" + dbConf.Addr +
 		")/test?charset=utf8mb4&parseTime=True&loc=Local"
 
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{Logger: logger.Default.LogMode(logger.Info)})
 	if err != nil {
 		log.Println("failed to connect database" + err.Error())
 		return nil, err

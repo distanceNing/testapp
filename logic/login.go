@@ -36,8 +36,8 @@ func (loginSvc *LoginService) Register(req *LoginRequest, rsp *common.Rsp) commo
 	} else if status.Code() != common.ErrUserNotExist {
 		return status
 	}
-	status = repo.CreateObject(&repo.UserInfo{req.UserId, req.NickName, UserTypeMap[req.UserType],
-		req.Password, req.Email, time.Now(), time.Now()})
+	status = repo.CreateObject(&repo.UserInfo{UserId: req.UserId, NickName: req.NickName, UserType: UserTypeMap[req.UserType],
+		UserPassword: req.Password, Email: req.Email, CreatedAt: time.Now(), UpdatedAt: time.Now()})
 	if !status.Ok() {
 		return status
 	}

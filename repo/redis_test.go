@@ -26,8 +26,4 @@ func TestNewRedisInstance(t *testing.T) {
 		panic(err)
 	}
 
-	if res.Name() != "value1" {
-		t.Errorf("TestNewRedisInstance = %v, want %v", res.String(), "value1")
-	}
-
 }

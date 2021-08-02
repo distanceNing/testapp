@@ -8,8 +8,11 @@ const (
 	ErrPasswordNotMatch
 	ErrTokenNotMatch
 	ErrJsonDecodeFail
-	ErrDbDupKey = 10
+	ErrRequest
+
+	ErrDbDupKey = 100
 	ErrNoAffected
+	ErrRecordNotExist
 )
 
 type Status struct {
