@@ -53,7 +53,6 @@ func getParamToInt(c *gin.Context, key string, val *int) error {
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 

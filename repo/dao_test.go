@@ -57,7 +57,7 @@ func TestQueryObjectByPage(t *testing.T) {
 		pageCount int
 		pageNum   int
 	}
-	objs := []ArticleInfo{}
+	var objs []ArticleInfo
 	arg := args{&ArticleInfo{Status: 0}, &objs, 0, 2}
 
 	tests := []struct {

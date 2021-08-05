@@ -6,8 +6,10 @@ import (
 	"log"
 )
 
+const confFilePath = "conf.yaml"
+
 func main() {
-	status, svrConf := conf.ReadConf("conf.yaml")
+	status, svrConf := conf.ReadConf(confFilePath)
 	if !status.Ok() {
 		return
 	}

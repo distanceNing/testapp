@@ -28,22 +28,6 @@ type ArticleInfo struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-type CommentInfo struct {
-	Id          int    `gorm:"primaryKey:autoIncrement"`
-	BelongTo    int    `gorm:"index"` // 属于那个作品
-	PublisherId string `gorm:"index"`
-	Content     string
-	Status      int
-	CreatedAt   time.Time
-}
-
-type CommentReply struct {
-	ParentId    int    `gorm:"primaryKey"` // 父评论id
-	PublisherId string `gorm:"index"`
-	Content     string
-	Status      int
-	CreatedAt   time.Time
-}
 
 type ImageInfo struct {
 	Id       int64 `gorm:"primaryKey"`

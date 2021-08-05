@@ -17,7 +17,6 @@ type UploadImageReq struct {
 	Url      string
 	BelongTo string
 }
-
 type GetImageReq struct {
 	Collect   bool
 	PageNum   int
