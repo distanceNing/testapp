@@ -13,6 +13,11 @@ type DbConf struct {
 	Password string `yaml:"password"`
 }
 
+type MongoDbConf struct {
+	Addr     string `yaml:"addr"`
+	Database string `yaml:"database"`
+}
+
 type RedisConf struct {
 	Addr     string `yaml:"addr"`
 	User     string `yaml:"user"`
@@ -27,13 +32,14 @@ type AppConf struct {
 }
 
 type ServerConf struct {
-	AppConf   AppConf   `yaml:"appconf"`
-	DbConf    DbConf    `yaml:"dbconf"`
-	RedisConf RedisConf `yaml:"redisconf"`
+	AppConf     AppConf     `yaml:"appconf"`
+	DbConf      DbConf      `yaml:"dbconf"`
+	MongoDbConf MongoDbConf `yaml:"mongodbconf"`
+	RedisConf   RedisConf   `yaml:"redisconf"`
 }
 
-func ReadConf(confPath string) (common.Status, *ServerConf) {
-	status := common.NewStatus()
+func ReadConf(confPath string) (common.ErrorCode, *ServerConf) {
+	status := common.NewSuccCode()
 	f, err := os.Open(confPath)
 	if err != nil {
 		log.Println(err.Error())

@@ -31,8 +31,8 @@ func (svr *HttpSvr) Run(addr string) error {
 	return nil
 }
 
-func decodeBody(body io.Reader, v interface{}) common.Status {
-	status := common.NewStatus()
+func decodeBody(body io.Reader, v interface{}) common.ErrorCode {
+	status := common.NewSuccCode()
 	decoder := json.NewDecoder(body)
 	err := decoder.Decode(v)
 	if err != nil {
@@ -56,8 +56,8 @@ func getParamToInt(c *gin.Context, key string, val *int) error {
 	return nil
 }
 
-func (svr *HttpSvr) constructResponse(c *gin.Context, rsp *common.Rsp, status *common.Status) {
-	rsp.SetStatus(status)
+func (svr *HttpSvr) constructResponse(c *gin.Context, rsp *common.Rsp, status *common.ErrorCode) {
+	rsp.SetErrorCode(status)
 	c.JSON(200, rsp.GetV())
 }
 
@@ -125,7 +125,7 @@ func (svr *HttpSvr) initRouter() {
 
 	svr.engine.GET("/articles/search", func(c *gin.Context) {
 		rsp := common.NewRsp()
-		status := common.NewStatus()
+		status := common.NewSuccCode()
 		req := logic.GetArticlePageReq{}
 		err := getParamToInt(c, "channel_id", &req.ChannelId)
 		if err != nil {
@@ -148,7 +148,7 @@ func (svr *HttpSvr) initRouter() {
 	})
 
 	svr.engine.POST("/upload", func(c *gin.Context) {
-		status := common.NewStatus()
+		status := common.NewSuccCode()
 		rsp := common.NewRsp()
 		file, err := c.FormFile("image")
 		if err != nil {
@@ -167,7 +167,7 @@ func (svr *HttpSvr) initRouter() {
 
 	svr.engine.GET("/images", func(c *gin.Context) {
 		rsp := common.NewRsp()
-		status := common.NewStatus()
+		status := common.NewSuccCode()
 		req := logic.GetImageReq{}
 		err := getParamToInt(c, "page_num", &req.PageNum)
 		if err != nil {

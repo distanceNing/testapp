@@ -36,8 +36,8 @@ type ImageInfo struct {
 }
 
 // 分页查询
-func QueryObjectByPage(cond interface{}, objs interface{}, pageCount int, pageNum int) common.Status {
-	status := common.NewStatus()
+func QueryObjectByPage(cond interface{}, objs interface{}, pageCount int, pageNum int) common.ErrorCode {
+	status := common.NewSuccCode()
 	res := Storage.db.Limit(pageCount).Offset(pageCount * (pageNum - 1)).Where(cond).Find(objs)
 	if res.Error == gorm.ErrRecordNotFound {
 		status.Set(common.ErrRecordNotExist, "record not exist")
@@ -47,8 +47,8 @@ func QueryObjectByPage(cond interface{}, objs interface{}, pageCount int, pageNu
 	return status
 }
 
-func QueryObjectCount(cond interface{}, count *int64) common.Status {
-	status := common.NewStatus()
+func QueryObjectCount(cond interface{}, count *int64) common.ErrorCode {
+	status := common.NewSuccCode()
 	res := Storage.db.Model(cond).Where(cond).Count(count)
 	if res.Error == gorm.ErrRecordNotFound {
 		status.Set(common.ErrRecordNotExist, "record not exist")
@@ -59,9 +59,9 @@ func QueryObjectCount(cond interface{}, count *int64) common.Status {
 	return status
 }
 
-func QueryUserInfo(userId string) (common.Status, UserInfo) {
+func QueryUserInfo(userId string) (common.ErrorCode, UserInfo) {
 	var userInfo UserInfo
-	status := common.NewStatus()
+	status := common.NewSuccCode()
 	res := Storage.db.Where(&UserInfo{UserId: userId}).First(&userInfo)
 	if res.Error == gorm.ErrRecordNotFound {
 		status.Set(common.ErrUserNotExist, "user not exist")
@@ -71,8 +71,8 @@ func QueryUserInfo(userId string) (common.Status, UserInfo) {
 	return status, userInfo
 }
 
-func QueryObject(cond interface{}, obj interface{}) common.Status {
-	status := common.NewStatus()
+func QueryObject(cond interface{}, obj interface{}) common.ErrorCode {
+	status := common.NewSuccCode()
 	res := Storage.db.Where(cond).First(obj)
 	if res.Error == gorm.ErrRecordNotFound {
 		status.Set(common.ErrRecordNotExist, "record not exist")
@@ -82,8 +82,8 @@ func QueryObject(cond interface{}, obj interface{}) common.Status {
 	return status
 }
 
-func CreateObject(obj interface{}) common.Status {
-	status := common.NewStatus()
+func CreateObject(obj interface{}) common.ErrorCode {
+	status := common.NewSuccCode()
 	res := Storage.db.Create(obj)
 	if res.RowsAffected == 0 {
 		status.Set(common.ErrDbDupKey, "insert dup key")
@@ -92,8 +92,8 @@ func CreateObject(obj interface{}) common.Status {
 	return status
 }
 
-func UpdateObject(cond interface{}, updateField interface{}) common.Status {
-	status := common.NewStatus()
+func UpdateObject(cond interface{}, updateField interface{}) common.ErrorCode {
+	status := common.NewSuccCode()
 	res := Storage.db.Model(cond).Updates(updateField)
 	if res.RowsAffected == 0 {
 		status.Set(common.ErrNoAffected, "db update op affected 0 row")
@@ -102,8 +102,8 @@ func UpdateObject(cond interface{}, updateField interface{}) common.Status {
 	return status
 }
 
-func DeleteObject(cond interface{}) common.Status {
-	status := common.NewStatus()
+func DeleteObject(cond interface{}) common.ErrorCode {
+	status := common.NewSuccCode()
 	res := Storage.db.Model(cond).Delete(cond)
 	if res.RowsAffected == 0 {
 		status.Set(common.ErrNoAffected, "db delete op affected 0 row")

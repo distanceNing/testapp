@@ -71,7 +71,7 @@ func NewArticleManager() *ArticleManager {
 	return &ArticleManager{}
 }
 
-func (mgr *ArticleManager) SearchArticle(req *GetArticlePageReq, rsp *common.Rsp) common.Status {
+func (mgr *ArticleManager) SearchArticle(req *GetArticlePageReq, rsp *common.Rsp) common.ErrorCode {
 	cond := &repo.ArticleInfo{}
 	if req.ChannelId != 0 {
 		cond.ChannelId = req.ChannelId
@@ -102,8 +102,8 @@ func (mgr *ArticleManager) SearchArticle(req *GetArticlePageReq, rsp *common.Rsp
 	return status
 }
 
-func (mgr *ArticleManager) GetArticle(req *GetArticleReq, rsp *common.Rsp) common.Status {
-	status := common.NewStatus()
+func (mgr *ArticleManager) GetArticle(req *GetArticleReq, rsp *common.Rsp) common.ErrorCode {
+	status := common.NewSuccCode()
 	id, err := strconv.Atoi(req.Id)
 	if err != nil {
 		status.Set(common.ErrRequest, "id to int failed")
@@ -135,8 +135,8 @@ func (mgr *ArticleManager) GetArticle(req *GetArticleReq, rsp *common.Rsp) commo
 	return status
 }
 
-func (mgr *ArticleManager) CreateArticle(req *CreateArticleReq, rsp *common.Rsp) common.Status {
-	status := common.NewStatus()
+func (mgr *ArticleManager) CreateArticle(req *CreateArticleReq, rsp *common.Rsp) common.ErrorCode {
+	status := common.NewSuccCode()
 	if req.Title == "" || req.Content == "" {
 		status.Set(common.ErrRequest, "title or content is empty ")
 		return status
@@ -151,8 +151,8 @@ func (mgr *ArticleManager) CreateArticle(req *CreateArticleReq, rsp *common.Rsp)
 	return status
 }
 
-func (mgr *ArticleManager) DeleteArticle(req *DeleteArticleReq, rsp *common.Rsp) common.Status {
-	status := common.NewStatus()
+func (mgr *ArticleManager) DeleteArticle(req *DeleteArticleReq, rsp *common.Rsp) common.ErrorCode {
+	status := common.NewSuccCode()
 	id, err := strconv.Atoi(req.Id)
 	if err != nil {
 		status.Set(common.ErrRequest, "id to int failed")
@@ -162,8 +162,8 @@ func (mgr *ArticleManager) DeleteArticle(req *DeleteArticleReq, rsp *common.Rsp)
 	return status
 }
 
-func (mgr *ArticleManager) UpdateArticle(req *UpdateArticleReq, rsp *common.Rsp) common.Status {
-	status := common.NewStatus()
+func (mgr *ArticleManager) UpdateArticle(req *UpdateArticleReq, rsp *common.Rsp) common.ErrorCode {
+	status := common.NewSuccCode()
 	id, err := strconv.Atoi(req.Id)
 	if err != nil {
 		status.Set(common.ErrRequest, "id to int failed")
@@ -184,7 +184,7 @@ func (mgr *ArticleManager) UpdateArticle(req *UpdateArticleReq, rsp *common.Rsp)
 	return status
 }
 
-func (mgr *ArticleManager) GetChannels(req *CreateArticleReq, rsp *common.Rsp) common.Status {
+func (mgr *ArticleManager) GetChannels(req *CreateArticleReq, rsp *common.Rsp) common.ErrorCode {
 	rsp.Set("channels", []ChannelInfo{{1, "团队活动"}, {2, "科研获奖"}, {3, "教学获奖"}})
-	return common.NewStatus()
+	return common.NewSuccCode()
 }

@@ -20,8 +20,8 @@ func (mgr *SessionManager) genLoginToken() string {
 	return strings.ToUpper(common.RandString(16))
 }
 
-func (mgr *SessionManager) QuerySessionToken(userId string) (common.Status, string) {
-	status := common.NewStatus()
+func (mgr *SessionManager) QuerySessionToken(userId string) (common.ErrorCode, string) {
+	status := common.NewSuccCode()
 	ctx := context.Background()
 	res := mgr.redisCli.RedisCli.Get(ctx, userId)
 	if res.Err() != nil {
@@ -36,18 +36,18 @@ func (mgr *SessionManager) QuerySessionToken(userId string) (common.Status, stri
 	return status, t
 }
 
-func (mgr *SessionManager) CreateSession(userId string) (common.Status, string) {
+func (mgr *SessionManager) CreateSession(userId string) (common.ErrorCode, string) {
 	ctx := context.Background()
 	token := mgr.genLoginToken()
-	status := common.NewStatus()
-	luaScript := "local val = redis.call('GET', KEYS[1])\n" +
-		"if val == nil or val == false then \n" +
-		"    redis.call('SETEX', KEYS[1], ARGV[2] , ARGV[1])\n" +
-		"    return ARGV[1]\n" +
-		"else\n" +
-		"    return val\n" +
-		"end\n"
-	res := mgr.redisCli.RedisCli.Eval(ctx, luaScript, []string{userId}, token, TokenTimeOut)
+	status := common.NewSuccCode()
+	s := "local val = redis.call('GET', KEYS[1])             \n" +
+		"if val == nil or val == false then                  \n" +
+		"    redis.call('SETEX', KEYS[1], ARGV[2] , ARGV[1]) \n" +
+		"    return ARGV[1]                                  \n" +
+		"else                                                \n" +
+		"    return val                                      \n" +
+		"end                                                 \n"
+	res := mgr.redisCli.RedisCli.Eval(ctx, s, []string{userId}, token, TokenTimeOut)
 	if res.Err() != nil {
 		status.Set(common.ErrSystem, res.Err().Error())
 		return status, ""

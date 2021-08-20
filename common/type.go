@@ -12,7 +12,7 @@ func NewRsp() *Rsp {
 	return &Rsp{make(map[string]interface{})}
 }
 
-func (rsp *Rsp) SetStatus(status *Status) {
+func (rsp *Rsp) SetErrorCode(status *ErrorCode) {
 	rsp.v["ret"] = status.Code()
 	rsp.v["msg"] = status.Msg()
 }

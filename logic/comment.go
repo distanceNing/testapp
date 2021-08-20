@@ -2,10 +2,17 @@ package logic
 
 import (
 	"github.com/distanceNing/testapp/common"
+	"github.com/distanceNing/testapp/repo"
 	"time"
 )
 
+const (
+	commentReplyCollection   = "comment_reply"
+	articleCommentCollection = "comment_info"
+)
+
 type CommentManger struct {
+	store *repo.MongoDbInstance
 }
 
 type CreateCommentReq struct {
@@ -45,17 +52,18 @@ type CommentReply struct {
 type ArticleComment struct {
 }
 
-func (mgr *CommentManger) CreateComment(req *CreateCommentReq, rsp *common.Rsp) common.Status {
-	status := common.NewStatus()
+func (mgr *CommentManger) CreateComment(req *CreateCommentReq, rsp *common.Rsp) common.ErrorCode {
+	status := common.NewSuccCode()
+
 	return status
 }
 
-func (mgr *CommentManger) CreateCommentReply(req *CommentReplyReq, rsp *common.Rsp) common.Status {
-	status := common.NewStatus()
+func (mgr *CommentManger) CreateCommentReply(req *CommentReplyReq, rsp *common.Rsp) common.ErrorCode {
+	status := common.NewSuccCode()
 	return status
 }
 
-func (mgr *CommentManger) GetCommentReply(req *GetCommentReplyReq, rsp *common.Rsp) common.Status {
-	status := common.NewStatus()
+func (mgr *CommentManger) GetCommentReply(req *GetCommentReplyReq, rsp *common.Rsp) common.ErrorCode {
+	status := common.NewSuccCode()
 	return status
 }

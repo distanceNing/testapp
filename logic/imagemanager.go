@@ -23,7 +23,7 @@ type GetImageReq struct {
 	PageCount int
 }
 
-func (mgr *ImageManager) Upload(req *UploadImageReq, rsp *common.Rsp) common.Status {
+func (mgr *ImageManager) Upload(req *UploadImageReq, rsp *common.Rsp) common.ErrorCode {
 	id := mgr.idGenerator.NextVal()
 	s := repo.CreateObject(repo.ImageInfo{id, req.BelongTo, req.Url})
 	if !s.Ok() {
@@ -34,7 +34,7 @@ func (mgr *ImageManager) Upload(req *UploadImageReq, rsp *common.Rsp) common.Sta
 	return s
 }
 
-func (mgr *ImageManager) GetImages(req *GetImageReq, rsp *common.Rsp) common.Status {
+func (mgr *ImageManager) GetImages(req *GetImageReq, rsp *common.Rsp) common.ErrorCode {
 	cond := &repo.ImageInfo{}
 	var totalCnt int64
 	status := repo.QueryObjectCount(cond, &totalCnt)

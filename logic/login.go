@@ -28,7 +28,7 @@ func NewLoginService(conf *conf.RedisConf) *LoginService {
 }
 
 // Login
-func (loginSvc *LoginService) Register(req *LoginRequest, rsp *common.Rsp) common.Status {
+func (loginSvc *LoginService) Register(req *LoginRequest, rsp *common.Rsp) common.ErrorCode {
 	status, _ := repo.QueryUserInfo(req.UserId)
 	if status.Ok() {
 		status.Set(common.ErrUserAlreadyExist, "user already exist")
@@ -45,7 +45,7 @@ func (loginSvc *LoginService) Register(req *LoginRequest, rsp *common.Rsp) commo
 }
 
 // Login
-func (loginSvc *LoginService) Login(req *LoginRequest, rsp *common.Rsp) common.Status {
+func (loginSvc *LoginService) Login(req *LoginRequest, rsp *common.Rsp) common.ErrorCode {
 	status, userInfo := repo.QueryUserInfo(req.UserId)
 	if !status.Ok() {
 		return status
@@ -63,7 +63,7 @@ func (loginSvc *LoginService) Login(req *LoginRequest, rsp *common.Rsp) common.S
 	return status
 }
 
-func (loginSvc *LoginService) CheckSessionToken(userId string, token string) common.Status {
+func (loginSvc *LoginService) CheckSessionToken(userId string, token string) common.ErrorCode {
 	status, tokenInSvr := loginSvc.sessionMgr.QuerySessionToken(userId)
 	if !status.Ok() {
 		return status

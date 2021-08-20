@@ -2,27 +2,44 @@ package repo
 
 import (
 	"context"
-	"fmt"
-	"log"
-
+	"github.com/distanceNing/testapp/conf"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"log"
 )
 
-func TestMongoDB() {
-	// 设置客户端连接配置
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+type MongoDbInstance struct {
+	client *mongo.Client
+	conf   *conf.MongoDbConf
+}
 
-	// 连接到MongoDB
+func NewMongoDbInstance(conf *conf.MongoDbConf) (*MongoDbInstance, error) {
+	uri := "mongodb://" + conf.Addr
+	clientOptions := options.Client().ApplyURI(uri)
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
+	return &MongoDbInstance{client: client, conf: conf}, nil
+}
 
-	// 检查连接
-	err = client.Ping(context.TODO(), nil)
+func (mongo *MongoDbInstance) InsertOne(ctx context.Context, collectName string, v interface{}) error {
+	db := mongo.client.Database(mongo.conf.Database)
+	insertResult, err := db.Collection(collectName).InsertOne(ctx, v)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Connected to MongoDB!")
+	log.Println(insertResult.InsertedID)
+	return nil
+}
+
+func (mongo *MongoDbInstance) Update(ctx context.Context, collectName string, id interface{}, updateField interface{}) error {
+	db := mongo.client.Database(mongo.conf.Database)
+	res, err := db.Collection(collectName).UpdateByID(ctx, id, updateField)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println(res.MatchedCount)
+	return nil
 }
