@@ -1,6 +1,9 @@
-package common
+package statemachine
 
-import "log"
+import (
+	"github.com/distanceNing/testapp/common/errcode"
+	"log"
+)
 
 type Executor struct {
 	msgCodec RetryMessageCodec
@@ -26,7 +29,8 @@ func (e *Executor) ProcRetryMessage(data []byte) {
 		return
 	}
 	log.Printf("do [%s] flow", msg.flowName)
-	e.do(msg.cur, sm, msg.req, NewSuccCode())
+	// TODO rsp
+	e.do(msg.cur, sm, msg.req, "")
 }
 
 func (e *Executor) ProcRequest(flowName string, req interface{}, rsp interface{}) {
@@ -52,7 +56,7 @@ func (e *Executor) constructRetryMessage(cur State, sm *StateMachine, req interf
 
 func (e *Executor) do(cur State, sm *StateMachine, req interface{}, rsp interface{}) {
 	err := sm.Run(&cur, req, rsp)
-	if err != nil && Code(err) == ErrNeedRetry {
+	if err != nil && errcode.Code(err) == errcode.ErrNeedRetry {
 		e.constructRetryMessage(cur, sm, e)
 	}
 }

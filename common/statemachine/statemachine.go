@@ -1,6 +1,7 @@
-package common
+package statemachine
 
 import (
+	"github.com/distanceNing/testapp/common/errcode"
 	"log"
 )
 
@@ -51,7 +52,7 @@ func (s *StateMachine) Run(cur *State, req interface{}, rsp interface{}) error {
 		node, ok := s.states[*cur]
 		if !ok {
 			log.Printf("state :%d not register ", *cur)
-			return NewErrorCode(ErrSystem, "state not register")
+			return errcode.NewErrorCode(errcode.ErrSystem, "state not register")
 		}
 		next, err := node.Do(req, rsp, ext)
 		if err != nil {
@@ -59,5 +60,5 @@ func (s *StateMachine) Run(cur *State, req interface{}, rsp interface{}) error {
 		}
 		*cur = next
 	}
-	return NewSuccCode()
+	return nil
 }

@@ -1,7 +1,7 @@
 package logic
 
 import (
-	"github.com/distanceNing/testapp/common"
+	"github.com/distanceNing/testapp/common/types"
 	"github.com/distanceNing/testapp/repo"
 	"time"
 )
@@ -33,7 +33,7 @@ type GetCommentReplyReq struct {
 }
 
 type CommentInfo struct {
-	Id          int64  `json:"id"`
+	Id          int64  `json:"idgenerator"`
 	ArticleId   int64  `gorm:"index"` // 属于那个作品
 	PublisherId string `gorm:"index"`
 	Content     string
@@ -52,14 +52,14 @@ type CommentReply struct {
 type ArticleComment struct {
 }
 
-func (mgr *CommentManger) CreateComment(req *CreateCommentReq, rsp *common.Rsp) error {
+func (mgr *CommentManger) CreateComment(req *CreateCommentReq, rsp *types.Rsp) error {
 	return nil
 }
 
-func (mgr *CommentManger) CreateCommentReply(req *CommentReplyReq, rsp *common.Rsp) error {
+func (mgr *CommentManger) CreateCommentReply(req *CommentReplyReq, rsp *types.Rsp) error {
 	return nil
 }
 
-func (mgr *CommentManger) GetCommentReply(req *GetCommentReplyReq, rsp *common.Rsp) error {
+func (mgr *CommentManger) GetCommentReply(req *GetCommentReplyReq, rsp *types.Rsp) error {
 	return nil
 }

@@ -1,4 +1,4 @@
-package common
+package statemachine
 
 import (
 	"testing"
@@ -28,7 +28,7 @@ func TestStateMachine_AddState(t *testing.T) {
 			s := &StateMachine{
 				states: tt.fields.states,
 			}
-			s.AddState(tt.args.node)
+			AddState(tt.args.node)
 		})
 	}
 }

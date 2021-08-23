@@ -2,7 +2,8 @@ package logic
 
 import (
 	"context"
-	"github.com/distanceNing/testapp/common"
+	"github.com/distanceNing/testapp/common/errcode"
+	"github.com/distanceNing/testapp/common/test"
 	"github.com/distanceNing/testapp/conf"
 	"github.com/distanceNing/testapp/repo"
 	"strings"
@@ -17,27 +18,25 @@ func NewSessionManager(conf *conf.RedisConf) *SessionManager {
 }
 
 func (mgr *SessionManager) genLoginToken() string {
-	return strings.ToUpper(common.RandString(16))
+	return strings.ToUpper(test.RandString(16))
 }
 
 func (mgr *SessionManager) QuerySessionToken(userId string) (error, string) {
-	status := common.NewSuccCode()
 	ctx := context.Background()
 	res := mgr.redisCli.RedisCli.Get(ctx, userId)
 	if res.Err() != nil {
-		return common.NewErrorCode(common.ErrSystem, "query session failed"), ""
+		return errcode.NewErrorCode(errcode.ErrSystem, "query session failed"), ""
 	}
 	t, err := res.Result()
 	if err != nil {
-		return common.NewErrorCode(common.ErrSystem, "get redis op return val failed"), ""
+		return errcode.NewErrorCode(errcode.ErrSystem, "get redis op return val failed"), ""
 	}
-	return status, t
+	return nil, t
 }
 
 func (mgr *SessionManager) CreateSession(userId string) (error, string) {
 	ctx := context.Background()
 	token := mgr.genLoginToken()
-	status := common.NewSuccCode()
 	s := "local val = redis.call('GET', KEYS[1])             \n" +
 		"if val == nil or val == false then                  \n" +
 		"    redis.call('SETEX', KEYS[1], ARGV[2] , ARGV[1]) \n" +
@@ -47,11 +46,11 @@ func (mgr *SessionManager) CreateSession(userId string) (error, string) {
 		"end                                                 \n"
 	res := mgr.redisCli.RedisCli.Eval(ctx, s, []string{userId}, token, TokenTimeOut)
 	if res.Err() != nil {
-		return common.NewErrorCode(common.ErrSystem, res.Err().Error()), ""
+		return errcode.NewErrorCode(errcode.ErrSystem, res.Err().Error()), ""
 	}
 	t, err := res.Result()
 	if err != nil {
-		return common.NewErrorCode(common.ErrSystem, "get redis op return val failed"), ""
+		return errcode.NewErrorCode(errcode.ErrSystem, "get redis op return val failed"), ""
 	}
-	return status, t.(string)
+	return nil, t.(string)
 }

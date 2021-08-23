@@ -1,4 +1,4 @@
-package common
+package test
 
 import (
 	"crypto/aes"

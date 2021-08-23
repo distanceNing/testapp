@@ -1,4 +1,4 @@
-package common
+package test
 
 type Node struct {
 	n string

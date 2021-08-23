@@ -1,4 +1,4 @@
-package common
+package errcode
 
 const (
 	ErrSystem = 1
@@ -56,16 +56,8 @@ func (s *ErrorCode) Error() string {
 	return s.Msg
 }
 
-func NewSuccCode() error {
-	return &ErrorCode{0, "ok"}
-}
-
 func NewErrorCode(code int, msg string) error {
 	return &ErrorCode{code, msg}
-}
-
-func (s *ErrorCode) Ok() bool {
-	return s.Code == 0
 }
 
 func (s *ErrorCode) Set(code int, msg string) {

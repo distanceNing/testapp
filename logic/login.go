@@ -1,7 +1,8 @@
 package logic
 
 import (
-	"github.com/distanceNing/testapp/common"
+	"github.com/distanceNing/testapp/common/errcode"
+	"github.com/distanceNing/testapp/common/types"
 	"github.com/distanceNing/testapp/conf"
 	"github.com/distanceNing/testapp/repo"
 	"time"
@@ -28,11 +29,11 @@ func NewLoginService(conf *conf.RedisConf) *LoginService {
 }
 
 // Login
-func (loginSvc *LoginService) Register(req *LoginRequest, rsp *common.Rsp) error {
+func (loginSvc *LoginService) Register(req *LoginRequest, rsp *types.Rsp) error {
 	err, _ := repo.QueryUserInfo(req.UserId)
 	if err != nil {
-		return common.NewErrorCode(common.ErrUserAlreadyExist, "user already exist")
-	} else if common.Code(err) != common.ErrUserNotExist {
+		return errcode.NewErrorCode(errcode.ErrUserAlreadyExist, "user already exist")
+	} else if errcode.Code(err) != errcode.ErrUserNotExist {
 		return err
 	}
 	err = repo.CreateObject(&repo.UserInfo{UserId: req.UserId, NickName: req.NickName, UserType: UserTypeMap[req.UserType],
@@ -44,13 +45,13 @@ func (loginSvc *LoginService) Register(req *LoginRequest, rsp *common.Rsp) error
 }
 
 // Login
-func (loginSvc *LoginService) Login(req *LoginRequest, rsp *common.Rsp) error {
+func (loginSvc *LoginService) Login(req *LoginRequest, rsp *types.Rsp) error {
 	err, userInfo := repo.QueryUserInfo(req.UserId)
 	if err != nil {
 		return err
 	}
 	if userInfo.UserPassword != req.Password {
-		return common.NewErrorCode(common.ErrPasswordNotMatch, "user password not match")
+		return errcode.NewErrorCode(errcode.ErrPasswordNotMatch, "user password not match")
 	}
 	var token string
 	err, token = loginSvc.sessionMgr.CreateSession(req.UserId)
@@ -67,7 +68,7 @@ func (loginSvc *LoginService) CheckSessionToken(userId string, token string) err
 		return err
 	}
 	if token != tokenInSvr {
-		return common.NewErrorCode(common.ErrTokenNotMatch, "req token not match in svr")
+		return errcode.NewErrorCode(errcode.ErrTokenNotMatch, "req token not match in svr")
 	}
 	return err
 }

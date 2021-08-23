@@ -1,4 +1,4 @@
-package common
+package statemachine
 
 import "testing"
 
@@ -25,7 +25,7 @@ func TestExecutor_ProcRequest(t *testing.T) {
 				msgCodec: tt.fields.msgCodec,
 				flowMap:  tt.fields.flowMap,
 			}
-			e.ProcRequest(tt.args.flowName, tt.args.req, tt.args.rsp)
+			ProcRequest(tt.args.flowName, tt.args.req, tt.args.rsp)
 		})
 	}
 }

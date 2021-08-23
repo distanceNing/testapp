@@ -1,7 +1,8 @@
 package logic
 
 import (
-	"github.com/distanceNing/testapp/common"
+	"github.com/distanceNing/testapp/common/errcode"
+	"github.com/distanceNing/testapp/common/types"
 	"github.com/distanceNing/testapp/repo"
 	"strconv"
 	"strings"
@@ -60,7 +61,7 @@ type UpdateArticleReq struct {
 }
 
 type ChannelInfo struct {
-	Id   int    `json:"id"`
+	Id   int    `json:"idgenerator"`
 	Name string `json:"name"`
 }
 
@@ -71,7 +72,7 @@ func NewArticleManager() *ArticleManager {
 	return &ArticleManager{}
 }
 
-func (mgr *ArticleManager) SearchArticle(req *GetArticlePageReq, rsp *common.Rsp) error {
+func (mgr *ArticleManager) SearchArticle(req *GetArticlePageReq, rsp *types.Rsp) error {
 	cond := &repo.ArticleInfo{}
 	if req.ChannelId != 0 {
 		cond.ChannelId = req.ChannelId
@@ -87,10 +88,10 @@ func (mgr *ArticleManager) SearchArticle(req *GetArticlePageReq, rsp *common.Rsp
 
 	var objs []repo.ArticleInfo
 	err = repo.QueryObjectByPage(cond, &objs, req.PageCount, req.PageNum)
-	if common.Code(err) == common.ErrRecordNotExist {
-		return common.NewErrorCode(common.ErrRecordNotExist, "article not exist")
+	if errcode.Code(err) == errcode.ErrRecordNotExist {
+		return errcode.NewErrorCode(errcode.ErrRecordNotExist, "article not exist")
 	} else if err != nil {
-		return common.NewErrorCode(common.ErrSystem, "query filed")
+		return errcode.NewErrorCode(errcode.ErrSystem, "query filed")
 	}
 
 	rsp.Set("total_count", totalCnt)
@@ -100,21 +101,21 @@ func (mgr *ArticleManager) SearchArticle(req *GetArticlePageReq, rsp *common.Rsp
 	return nil
 }
 
-func (mgr *ArticleManager) GetArticle(req *GetArticleReq, rsp *common.Rsp) error {
+func (mgr *ArticleManager) GetArticle(req *GetArticleReq, rsp *types.Rsp) error {
 	id, err := strconv.Atoi(req.Id)
 	if err != nil {
-		return common.NewErrorCode(common.ErrRequest, "id to int failed")
+		return errcode.NewErrorCode(errcode.ErrRequest, "idgenerator to int failed")
 	}
 	obj := repo.ArticleInfo{}
 	err = repo.QueryObject(&repo.ArticleInfo{Id: id}, &obj)
-	if common.Code(err) == common.ErrRecordNotExist {
-		return common.NewErrorCode(common.ErrRecordNotExist, "article not exist")
+	if errcode.Code(err) == errcode.ErrRecordNotExist {
+		return errcode.NewErrorCode(errcode.ErrRecordNotExist, "article not exist")
 	} else if err != nil {
-		return common.NewErrorCode(common.ErrSystem, "query filed")
+		return errcode.NewErrorCode(errcode.ErrSystem, "query filed")
 	}
 
 	type ArticleInfo struct {
-		Id        int       `json:"id"`
+		Id        int       `json:"idgenerator"`
 		ChannelId int       `json:"channel_id"`
 		Title     string    `json:"title"`
 		Content   string    `json:"content"`
@@ -129,9 +130,9 @@ func (mgr *ArticleManager) GetArticle(req *GetArticleReq, rsp *common.Rsp) error
 	return nil
 }
 
-func (mgr *ArticleManager) CreateArticle(req *CreateArticleReq, rsp *common.Rsp) error {
+func (mgr *ArticleManager) CreateArticle(req *CreateArticleReq, rsp *types.Rsp) error {
 	if req.Title == "" || req.Content == "" {
-		return common.NewErrorCode(common.ErrRequest, "title or content is empty ")
+		return errcode.NewErrorCode(errcode.ErrRequest, "title or content is empty ")
 	}
 
 	images := ""
@@ -143,19 +144,19 @@ func (mgr *ArticleManager) CreateArticle(req *CreateArticleReq, rsp *common.Rsp)
 	return err
 }
 
-func (mgr *ArticleManager) DeleteArticle(req *DeleteArticleReq, rsp *common.Rsp) error {
+func (mgr *ArticleManager) DeleteArticle(req *DeleteArticleReq, rsp *types.Rsp) error {
 	id, err := strconv.Atoi(req.Id)
 	if err != nil {
-		return common.NewErrorCode(common.ErrRequest, "id to int failed")
+		return errcode.NewErrorCode(errcode.ErrRequest, "idgenerator to int failed")
 	}
 	err = repo.DeleteObject(&repo.ArticleInfo{Id: id})
 	return err
 }
 
-func (mgr *ArticleManager) UpdateArticle(req *UpdateArticleReq, rsp *common.Rsp) error {
+func (mgr *ArticleManager) UpdateArticle(req *UpdateArticleReq, rsp *types.Rsp) error {
 	id, err := strconv.Atoi(req.Id)
 	if err != nil {
-		return common.NewErrorCode(common.ErrRequest, "id to int failed")
+		return errcode.NewErrorCode(errcode.ErrRequest, "idgenerator to int failed")
 	}
 	updateField := &repo.ArticleInfo{}
 	if req.Status != 0 {
@@ -172,7 +173,7 @@ func (mgr *ArticleManager) UpdateArticle(req *UpdateArticleReq, rsp *common.Rsp)
 	return err
 }
 
-func (mgr *ArticleManager) GetChannels(req *CreateArticleReq, rsp *common.Rsp) error {
+func (mgr *ArticleManager) GetChannels(req *CreateArticleReq, rsp *types.Rsp) error {
 	rsp.Set("channels", []ChannelInfo{{1, "团队活动"}, {2, "科研获奖"}, {3, "教学获奖"}})
-	return common.NewSuccCode()
+	return nil
 }

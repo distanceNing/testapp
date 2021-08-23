@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"github.com/distanceNing/testapp/common"
+	"github.com/distanceNing/testapp/common/types"
 	"github.com/distanceNing/testapp/conf"
 	"github.com/distanceNing/testapp/logic"
 	"github.com/gin-gonic/gin"
@@ -55,7 +56,7 @@ func getParamToInt(c *gin.Context, key string, val *int) error {
 	return nil
 }
 
-func (svr *HttpSvr) constructResponse(c *gin.Context, rsp *common.Rsp, err error) {
+func (svr *HttpSvr) constructResponse(c *gin.Context, rsp *types.Rsp, err error) {
 	rsp.Set("ret", common.Code(err))
 	rsp.Set("msg", common.Msg(err))
 	c.JSON(200, rsp.GetV())
@@ -63,7 +64,7 @@ func (svr *HttpSvr) constructResponse(c *gin.Context, rsp *common.Rsp, err error
 
 func (svr *HttpSvr) initRouter() {
 	svr.engine.POST("/register", func(c *gin.Context) {
-		rsp := common.NewRsp()
+		rsp := types.NewRsp()
 		loginReq := logic.LoginRequest{}
 		err := decodeBody(c.Request.Body, &loginReq)
 		if err != nil {
@@ -73,7 +74,7 @@ func (svr *HttpSvr) initRouter() {
 	})
 
 	svr.engine.POST("/login", func(c *gin.Context) {
-		rsp := common.NewRsp()
+		rsp := types.NewRsp()
 		loginReq := logic.LoginRequest{}
 		err := decodeBody(c.Request.Body, &loginReq)
 		if err != nil {
@@ -83,7 +84,7 @@ func (svr *HttpSvr) initRouter() {
 	})
 
 	svr.engine.POST("/articles/create", func(c *gin.Context) {
-		rsp := common.NewRsp()
+		rsp := types.NewRsp()
 		createArticleReq := logic.CreateArticleReq{}
 		err := decodeBody(c.Request.Body, &createArticleReq)
 		if err != nil {
@@ -92,23 +93,23 @@ func (svr *HttpSvr) initRouter() {
 		svr.constructResponse(c, rsp, err)
 	})
 
-	svr.engine.GET("/articles/get/:id", func(c *gin.Context) {
-		rsp := common.NewRsp()
-		req := logic.GetArticleReq{Id: c.Params.ByName("id")}
+	svr.engine.GET("/articles/get/:idgenerator", func(c *gin.Context) {
+		rsp := types.NewRsp()
+		req := logic.GetArticleReq{Id: c.Params.ByName("idgenerator")}
 		err := svr.svc.GetArticle(&req, rsp)
 		svr.constructResponse(c, rsp, err)
 	})
 
-	svr.engine.DELETE("/articles/:id", func(c *gin.Context) {
-		rsp := common.NewRsp()
-		req := logic.DeleteArticleReq{Id: c.Params.ByName("id")}
+	svr.engine.DELETE("/articles/:idgenerator", func(c *gin.Context) {
+		rsp := types.NewRsp()
+		req := logic.DeleteArticleReq{Id: c.Params.ByName("idgenerator")}
 		err := svr.svc.DeleteArticle(&req, rsp)
 		svr.constructResponse(c, rsp, err)
 	})
 
-	svr.engine.PUT("/articles/:id", func(c *gin.Context) {
-		rsp := common.NewRsp()
-		req := logic.UpdateArticleReq{Id: c.Params.ByName("id")}
+	svr.engine.PUT("/articles/:idgenerator", func(c *gin.Context) {
+		rsp := types.NewRsp()
+		req := logic.UpdateArticleReq{Id: c.Params.ByName("idgenerator")}
 		err := decodeBody(c.Request.Body, &req)
 		if err != nil {
 			err = svr.svc.UpdateArticle(&req, rsp)
@@ -117,14 +118,14 @@ func (svr *HttpSvr) initRouter() {
 	})
 
 	svr.engine.GET("/channels", func(c *gin.Context) {
-		rsp := common.NewRsp()
+		rsp := types.NewRsp()
 		createArticleReq := logic.CreateArticleReq{}
 		err := svr.svc.GetChannels(&createArticleReq, rsp)
 		svr.constructResponse(c, rsp, err)
 	})
 
 	svr.engine.GET("/articles/search", func(c *gin.Context) {
-		rsp := common.NewRsp()
+		rsp := types.NewRsp()
 		req := logic.GetArticlePageReq{}
 		err := getParamToInt(c, "channel_id", &req.ChannelId)
 		if err != nil {
@@ -148,7 +149,7 @@ func (svr *HttpSvr) initRouter() {
 
 	svr.engine.POST("/upload", func(c *gin.Context) {
 		err := common.NewSuccCode()
-		rsp := common.NewRsp()
+		rsp := types.NewRsp()
 		file, err := c.FormFile("image")
 		if err != nil {
 			svr.constructResponse(c, rsp, err)
@@ -164,7 +165,7 @@ func (svr *HttpSvr) initRouter() {
 	})
 
 	svr.engine.GET("/images", func(c *gin.Context) {
-		rsp := common.NewRsp()
+		rsp := types.NewRsp()
 		req := logic.GetImageReq{}
 		err := getParamToInt(c, "page_num", &req.PageNum)
 		if err != nil {
