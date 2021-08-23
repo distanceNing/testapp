@@ -71,7 +71,7 @@ func NewArticleManager() *ArticleManager {
 	return &ArticleManager{}
 }
 
-func (mgr *ArticleManager) SearchArticle(req *GetArticlePageReq, rsp *common.Rsp) common.ErrorCode {
+func (mgr *ArticleManager) SearchArticle(req *GetArticlePageReq, rsp *common.Rsp) error {
 	cond := &repo.ArticleInfo{}
 	if req.ChannelId != 0 {
 		cond.ChannelId = req.ChannelId
@@ -80,43 +80,37 @@ func (mgr *ArticleManager) SearchArticle(req *GetArticlePageReq, rsp *common.Rsp
 		cond.Status = req.Status
 	}
 	var totalCnt int64
-	status := repo.QueryObjectCount(cond, &totalCnt)
-	if !status.Ok() {
-		return status
+	err := repo.QueryObjectCount(cond, &totalCnt)
+	if err != nil {
+		return err
 	}
 
 	var objs []repo.ArticleInfo
-	repo.QueryObjectByPage(cond, &objs, req.PageCount, req.PageNum)
-	if status.Code() == common.ErrRecordNotExist {
-		status.Set(common.ErrRecordNotExist, "article not exist")
-		return status
-	} else if !status.Ok() {
-		status.Set(common.ErrSystem, "query filed")
-		return status
+	err = repo.QueryObjectByPage(cond, &objs, req.PageCount, req.PageNum)
+	if common.Code(err) == common.ErrRecordNotExist {
+		return common.NewErrorCode(common.ErrRecordNotExist, "article not exist")
+	} else if err != nil {
+		return common.NewErrorCode(common.ErrSystem, "query filed")
 	}
 
 	rsp.Set("total_count", totalCnt)
 	rsp.Set("page", req.PageNum)
 	rsp.Set("per_page", req.PageCount)
 	rsp.Set("results", objs)
-	return status
+	return nil
 }
 
-func (mgr *ArticleManager) GetArticle(req *GetArticleReq, rsp *common.Rsp) common.ErrorCode {
-	status := common.NewSuccCode()
+func (mgr *ArticleManager) GetArticle(req *GetArticleReq, rsp *common.Rsp) error {
 	id, err := strconv.Atoi(req.Id)
 	if err != nil {
-		status.Set(common.ErrRequest, "id to int failed")
-		return status
+		return common.NewErrorCode(common.ErrRequest, "id to int failed")
 	}
 	obj := repo.ArticleInfo{}
-	status = repo.QueryObject(&repo.ArticleInfo{Id: id}, &obj)
-	if status.Code() == common.ErrRecordNotExist {
-		status.Set(common.ErrRecordNotExist, "article not exist")
-		return status
-	} else if !status.Ok() {
-		status.Set(common.ErrSystem, "query filed")
-		return status
+	err = repo.QueryObject(&repo.ArticleInfo{Id: id}, &obj)
+	if common.Code(err) == common.ErrRecordNotExist {
+		return common.NewErrorCode(common.ErrRecordNotExist, "article not exist")
+	} else if err != nil {
+		return common.NewErrorCode(common.ErrSystem, "query filed")
 	}
 
 	type ArticleInfo struct {
@@ -132,14 +126,12 @@ func (mgr *ArticleManager) GetArticle(req *GetArticleReq, rsp *common.Rsp) commo
 	images := strings.Split(obj.Images, "|")
 	rsp.Set("article_info", ArticleInfo{obj.Id, obj.ChannelId, obj.Title, obj.Content, images,
 		obj.Status, obj.CreatedAt, obj.UpdatedAt})
-	return status
+	return nil
 }
 
-func (mgr *ArticleManager) CreateArticle(req *CreateArticleReq, rsp *common.Rsp) common.ErrorCode {
-	status := common.NewSuccCode()
+func (mgr *ArticleManager) CreateArticle(req *CreateArticleReq, rsp *common.Rsp) error {
 	if req.Title == "" || req.Content == "" {
-		status.Set(common.ErrRequest, "title or content is empty ")
-		return status
+		return common.NewErrorCode(common.ErrRequest, "title or content is empty ")
 	}
 
 	images := ""
@@ -147,27 +139,23 @@ func (mgr *ArticleManager) CreateArticle(req *CreateArticleReq, rsp *common.Rsp)
 		images = images + req.Cover.Images[i] + "|"
 	}
 	obj := repo.ArticleInfo{Title: req.Title, ChannelId: req.ChannelId, Content: req.Content, Images: images, Status: req.Status}
-	status = repo.CreateObject(&obj)
-	return status
+	err := repo.CreateObject(&obj)
+	return err
 }
 
-func (mgr *ArticleManager) DeleteArticle(req *DeleteArticleReq, rsp *common.Rsp) common.ErrorCode {
-	status := common.NewSuccCode()
+func (mgr *ArticleManager) DeleteArticle(req *DeleteArticleReq, rsp *common.Rsp) error {
 	id, err := strconv.Atoi(req.Id)
 	if err != nil {
-		status.Set(common.ErrRequest, "id to int failed")
-		return status
+		return common.NewErrorCode(common.ErrRequest, "id to int failed")
 	}
-	repo.DeleteObject(&repo.ArticleInfo{Id: id})
-	return status
+	err = repo.DeleteObject(&repo.ArticleInfo{Id: id})
+	return err
 }
 
-func (mgr *ArticleManager) UpdateArticle(req *UpdateArticleReq, rsp *common.Rsp) common.ErrorCode {
-	status := common.NewSuccCode()
+func (mgr *ArticleManager) UpdateArticle(req *UpdateArticleReq, rsp *common.Rsp) error {
 	id, err := strconv.Atoi(req.Id)
 	if err != nil {
-		status.Set(common.ErrRequest, "id to int failed")
-		return status
+		return common.NewErrorCode(common.ErrRequest, "id to int failed")
 	}
 	updateField := &repo.ArticleInfo{}
 	if req.Status != 0 {
@@ -180,11 +168,11 @@ func (mgr *ArticleManager) UpdateArticle(req *UpdateArticleReq, rsp *common.Rsp)
 		updateField.ChannelId = req.ChannelId
 	}
 
-	repo.UpdateObject(&repo.ArticleInfo{Id: id}, updateField)
-	return status
+	err = repo.UpdateObject(&repo.ArticleInfo{Id: id}, updateField)
+	return err
 }
 
-func (mgr *ArticleManager) GetChannels(req *CreateArticleReq, rsp *common.Rsp) common.ErrorCode {
+func (mgr *ArticleManager) GetChannels(req *CreateArticleReq, rsp *common.Rsp) error {
 	rsp.Set("channels", []ChannelInfo{{1, "团队活动"}, {2, "科研获奖"}, {3, "教学获奖"}})
 	return common.NewSuccCode()
 }

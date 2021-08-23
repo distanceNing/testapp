@@ -6,7 +6,7 @@ import (
 
 type State int
 
-type NodeHandler func(req interface{}, rsp interface{}, ext map[string]interface{}) (State, ErrorCode)
+type NodeHandler func(req interface{}, rsp interface{}, ext map[string]interface{}) (State, error)
 
 type StateNode struct {
 	Do    NodeHandler
@@ -38,21 +38,23 @@ func (s *StateMachine) GetBeginState() State {
 	return s.begin
 }
 
-func (s *StateMachine) AddState(node *StateNode) {
-	s.states[node.State] = node
+func (s *StateMachine) AddState(nodes []*StateNode) {
+	for i := range nodes {
+		s.states[nodes[i].State] = nodes[i]
+	}
 }
 
-func (s *StateMachine) Run(cur *State, req interface{}, rsp interface{}) ErrorCode {
+func (s *StateMachine) Run(cur *State, req interface{}, rsp interface{}) error {
 	// 节点中间处理数据
 	ext := make(map[string]interface{})
-	for ; *cur != s.end; {
+	for *cur != s.end {
 		node, ok := s.states[*cur]
 		if !ok {
 			log.Printf("state :%d not register ", *cur)
 			return NewErrorCode(ErrSystem, "state not register")
 		}
 		next, err := node.Do(req, rsp, ext)
-		if !err.Ok() {
+		if err != nil {
 			return err
 		}
 		*cur = next

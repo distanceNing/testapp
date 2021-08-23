@@ -31,15 +31,14 @@ func (svr *HttpSvr) Run(addr string) error {
 	return nil
 }
 
-func decodeBody(body io.Reader, v interface{}) common.ErrorCode {
-	status := common.NewSuccCode()
+func decodeBody(body io.Reader, v interface{}) error {
 	decoder := json.NewDecoder(body)
 	err := decoder.Decode(v)
 	if err != nil {
 		log.Println(err.Error())
-		status.Set(common.ErrJsonDecodeFail, "json decode failed")
+		return common.NewErrorCode(common.ErrJsonDecodeFail, "json decode failed")
 	}
-	return status
+	return nil
 }
 
 func getParamToInt(c *gin.Context, key string, val *int) error {
@@ -56,8 +55,9 @@ func getParamToInt(c *gin.Context, key string, val *int) error {
 	return nil
 }
 
-func (svr *HttpSvr) constructResponse(c *gin.Context, rsp *common.Rsp, status *common.ErrorCode) {
-	rsp.SetErrorCode(status)
+func (svr *HttpSvr) constructResponse(c *gin.Context, rsp *common.Rsp, err error) {
+	rsp.Set("ret", common.Code(err))
+	rsp.Set("msg", common.Msg(err))
 	c.JSON(200, rsp.GetV())
 }
 
@@ -65,73 +65,72 @@ func (svr *HttpSvr) initRouter() {
 	svr.engine.POST("/register", func(c *gin.Context) {
 		rsp := common.NewRsp()
 		loginReq := logic.LoginRequest{}
-		status := decodeBody(c.Request.Body, &loginReq)
-		if status.Ok() {
-			status = svr.svc.Register(&loginReq, rsp)
+		err := decodeBody(c.Request.Body, &loginReq)
+		if err != nil {
+			err = svr.svc.Register(&loginReq, rsp)
 		}
-		svr.constructResponse(c, rsp, &status)
+		svr.constructResponse(c, rsp, err)
 	})
 
 	svr.engine.POST("/login", func(c *gin.Context) {
 		rsp := common.NewRsp()
 		loginReq := logic.LoginRequest{}
-		status := decodeBody(c.Request.Body, &loginReq)
-		if status.Ok() {
-			status = svr.svc.Login(&loginReq, rsp)
+		err := decodeBody(c.Request.Body, &loginReq)
+		if err != nil {
+			err = svr.svc.Login(&loginReq, rsp)
 		}
-		svr.constructResponse(c, rsp, &status)
+		svr.constructResponse(c, rsp, err)
 	})
 
 	svr.engine.POST("/articles/create", func(c *gin.Context) {
 		rsp := common.NewRsp()
 		createArticleReq := logic.CreateArticleReq{}
-		status := decodeBody(c.Request.Body, &createArticleReq)
-		if status.Ok() {
-			status = svr.svc.CreateArticle(&createArticleReq, rsp)
+		err := decodeBody(c.Request.Body, &createArticleReq)
+		if err != nil {
+			err = svr.svc.CreateArticle(&createArticleReq, rsp)
 		}
-		svr.constructResponse(c, rsp, &status)
+		svr.constructResponse(c, rsp, err)
 	})
 
 	svr.engine.GET("/articles/get/:id", func(c *gin.Context) {
 		rsp := common.NewRsp()
 		req := logic.GetArticleReq{Id: c.Params.ByName("id")}
-		status := svr.svc.GetArticle(&req, rsp)
-		svr.constructResponse(c, rsp, &status)
+		err := svr.svc.GetArticle(&req, rsp)
+		svr.constructResponse(c, rsp, err)
 	})
 
 	svr.engine.DELETE("/articles/:id", func(c *gin.Context) {
 		rsp := common.NewRsp()
 		req := logic.DeleteArticleReq{Id: c.Params.ByName("id")}
-		status := svr.svc.DeleteArticle(&req, rsp)
-		svr.constructResponse(c, rsp, &status)
+		err := svr.svc.DeleteArticle(&req, rsp)
+		svr.constructResponse(c, rsp, err)
 	})
 
 	svr.engine.PUT("/articles/:id", func(c *gin.Context) {
 		rsp := common.NewRsp()
 		req := logic.UpdateArticleReq{Id: c.Params.ByName("id")}
-		status := decodeBody(c.Request.Body, &req)
-		if status.Ok() {
-			status = svr.svc.UpdateArticle(&req, rsp)
+		err := decodeBody(c.Request.Body, &req)
+		if err != nil {
+			err = svr.svc.UpdateArticle(&req, rsp)
 		}
-		svr.constructResponse(c, rsp, &status)
+		svr.constructResponse(c, rsp, err)
 	})
 
 	svr.engine.GET("/channels", func(c *gin.Context) {
 		rsp := common.NewRsp()
 		createArticleReq := logic.CreateArticleReq{}
-		status := svr.svc.GetChannels(&createArticleReq, rsp)
-		svr.constructResponse(c, rsp, &status)
+		err := svr.svc.GetChannels(&createArticleReq, rsp)
+		svr.constructResponse(c, rsp, err)
 	})
 
 	svr.engine.GET("/articles/search", func(c *gin.Context) {
 		rsp := common.NewRsp()
-		status := common.NewSuccCode()
 		req := logic.GetArticlePageReq{}
 		err := getParamToInt(c, "channel_id", &req.ChannelId)
 		if err != nil {
 			return
 		}
-		err = getParamToInt(c, "status", &req.Status)
+		err = getParamToInt(c, "err", &req.Status)
 		if err != nil {
 			return
 		}
@@ -143,31 +142,29 @@ func (svr *HttpSvr) initRouter() {
 		if err != nil {
 			return
 		}
-		status = svr.svc.SearchArticle(&req, rsp)
-		svr.constructResponse(c, rsp, &status)
+		err = svr.svc.SearchArticle(&req, rsp)
+		svr.constructResponse(c, rsp, err)
 	})
 
 	svr.engine.POST("/upload", func(c *gin.Context) {
-		status := common.NewSuccCode()
+		err := common.NewSuccCode()
 		rsp := common.NewRsp()
 		file, err := c.FormFile("image")
 		if err != nil {
-			status.Set(common.ErrRequest, "bad request")
-			svr.constructResponse(c, rsp, &status)
+			svr.constructResponse(c, rsp, err)
 			return
 		}
 		if err := c.SaveUploadedFile(file, svr.conf.AppConf.ImagePath+"image/"+file.Filename); err == nil {
 			req := &logic.UploadImageReq{Url: svr.conf.AppConf.CdnPath + "/image/" + file.Filename, BelongTo: "xxx"}
-			status = svr.svc.Upload(req, rsp)
+			err = svr.svc.Upload(req, rsp)
 		} else {
-			status.Set(common.ErrRequest, "save file failed")
+			err = common.NewErrorCode(common.ErrRequest, "save file failed")
 		}
-		svr.constructResponse(c, rsp, &status)
+		svr.constructResponse(c, rsp, err)
 	})
 
 	svr.engine.GET("/images", func(c *gin.Context) {
 		rsp := common.NewRsp()
-		status := common.NewSuccCode()
 		req := logic.GetImageReq{}
 		err := getParamToInt(c, "page_num", &req.PageNum)
 		if err != nil {
@@ -178,8 +175,8 @@ func (svr *HttpSvr) initRouter() {
 			return
 		}
 		req.Collect = c.Request.URL.Query().Get("collect") == "true"
-		status = svr.svc.GetImages(&req, rsp)
-		svr.constructResponse(c, rsp, &status)
+		err = svr.svc.GetImages(&req, rsp)
+		svr.constructResponse(c, rsp, err)
 	})
 
 	svr.engine.GET("/image/:file", func(c *gin.Context) {

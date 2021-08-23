@@ -12,10 +12,6 @@ func NewRsp() *Rsp {
 	return &Rsp{make(map[string]interface{})}
 }
 
-func (rsp *Rsp) SetErrorCode(status *ErrorCode) {
-	rsp.v["ret"] = status.Code()
-	rsp.v["msg"] = status.Msg()
-}
 
 func (rsp *Rsp) GetV() map[string]interface{} {
 	return rsp.v

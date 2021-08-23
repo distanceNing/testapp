@@ -20,23 +20,21 @@ func (mgr *SessionManager) genLoginToken() string {
 	return strings.ToUpper(common.RandString(16))
 }
 
-func (mgr *SessionManager) QuerySessionToken(userId string) (common.ErrorCode, string) {
+func (mgr *SessionManager) QuerySessionToken(userId string) (error, string) {
 	status := common.NewSuccCode()
 	ctx := context.Background()
 	res := mgr.redisCli.RedisCli.Get(ctx, userId)
 	if res.Err() != nil {
-		status.Set(common.ErrSystem, "query session failed")
-		return status, ""
+		return common.NewErrorCode(common.ErrSystem, "query session failed"), ""
 	}
 	t, err := res.Result()
 	if err != nil {
-		status.Set(common.ErrSystem, "get redis op return val failed")
-		return status, ""
+		return common.NewErrorCode(common.ErrSystem, "get redis op return val failed"), ""
 	}
 	return status, t
 }
 
-func (mgr *SessionManager) CreateSession(userId string) (common.ErrorCode, string) {
+func (mgr *SessionManager) CreateSession(userId string) (error, string) {
 	ctx := context.Background()
 	token := mgr.genLoginToken()
 	status := common.NewSuccCode()
@@ -49,13 +47,11 @@ func (mgr *SessionManager) CreateSession(userId string) (common.ErrorCode, strin
 		"end                                                 \n"
 	res := mgr.redisCli.RedisCli.Eval(ctx, s, []string{userId}, token, TokenTimeOut)
 	if res.Err() != nil {
-		status.Set(common.ErrSystem, res.Err().Error())
-		return status, ""
+		return common.NewErrorCode(common.ErrSystem, res.Err().Error()), ""
 	}
 	t, err := res.Result()
 	if err != nil {
-		status.Set(common.ErrSystem, "get redis op return val failed")
-		return status, ""
+		return common.NewErrorCode(common.ErrSystem, "get redis op return val failed"), ""
 	}
 	return status, t.(string)
 }

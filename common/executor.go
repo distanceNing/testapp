@@ -15,8 +15,18 @@ func (e *Executor) RegisterFlow(name string, sm *StateMachine) {
 	e.flowMap[name] = sm
 }
 
-func (e *Executor) ProcRetryMessage(msg *RetryMessage) {
-
+func (e *Executor) ProcRetryMessage(data []byte) {
+	msg, err := e.msgCodec.Deserialize(data)
+	if err != nil {
+		return
+	}
+	sm, ok := e.flowMap[msg.flowName]
+	if !ok {
+		log.Printf("[%s] not register", msg.flowName)
+		return
+	}
+	log.Printf("do [%s] flow", msg.flowName)
+	e.do(msg.cur, sm, msg.req, NewSuccCode())
 }
 
 func (e *Executor) ProcRequest(flowName string, req interface{}, rsp interface{}) {
@@ -36,13 +46,13 @@ func (e *Executor) constructRetryMessage(cur State, sm *StateMachine, req interf
 	if err != nil {
 		return
 	}
-	// TODO push msg to mq
+	// TODO push retry msg to mq
 	log.Println(data)
 }
 
 func (e *Executor) do(cur State, sm *StateMachine, req interface{}, rsp interface{}) {
 	err := sm.Run(&cur, req, rsp)
-	if !err.Ok() && err.Code() == ErrNeedRetry {
+	if err != nil && Code(err) == ErrNeedRetry {
 		e.constructRetryMessage(cur, sm, e)
 	}
 }

@@ -28,7 +28,6 @@ type ArticleInfo struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-
 type ImageInfo struct {
 	Id       int64 `gorm:"primaryKey"`
 	BelongTo string
@@ -36,78 +35,69 @@ type ImageInfo struct {
 }
 
 // 分页查询
-func QueryObjectByPage(cond interface{}, objs interface{}, pageCount int, pageNum int) common.ErrorCode {
-	status := common.NewSuccCode()
+func QueryObjectByPage(cond interface{}, objs interface{}, pageCount int, pageNum int) error {
 	res := Storage.db.Limit(pageCount).Offset(pageCount * (pageNum - 1)).Where(cond).Find(objs)
 	if res.Error == gorm.ErrRecordNotFound {
-		status.Set(common.ErrRecordNotExist, "record not exist")
+		return common.NewErrorCode(common.ErrRecordNotExist, "record not exist")
 	} else if res.Error != nil {
-		status.Set(common.ErrSystem, "query record failed")
+		return common.NewErrorCode(common.ErrSystem, "query record failed")
 	}
-	return status
+	return nil
 }
 
-func QueryObjectCount(cond interface{}, count *int64) common.ErrorCode {
-	status := common.NewSuccCode()
+func QueryObjectCount(cond interface{}, count *int64) error {
 	res := Storage.db.Model(cond).Where(cond).Count(count)
 	if res.Error == gorm.ErrRecordNotFound {
-		status.Set(common.ErrRecordNotExist, "record not exist")
+		return common.NewErrorCode(common.ErrRecordNotExist, "record not exist")
 	} else if res.Error != nil {
 		log.Println(res.Error.Error())
-		status.Set(common.ErrSystem, "query record failed")
+		return common.NewErrorCode(common.ErrSystem, "query record failed")
 	}
-	return status
+	return nil
 }
 
-func QueryUserInfo(userId string) (common.ErrorCode, UserInfo) {
+func QueryUserInfo(userId string) (error, UserInfo) {
 	var userInfo UserInfo
-	status := common.NewSuccCode()
 	res := Storage.db.Where(&UserInfo{UserId: userId}).First(&userInfo)
 	if res.Error == gorm.ErrRecordNotFound {
-		status.Set(common.ErrUserNotExist, "user not exist")
+		return common.NewErrorCode(common.ErrUserNotExist, "user not exist"), userInfo
 	} else if res.Error != nil {
-		status.Set(common.ErrSystem, "query user failed")
+		return common.NewErrorCode(common.ErrSystem, "query user failed"), userInfo
 	}
-	return status, userInfo
+	return nil, userInfo
 }
 
-func QueryObject(cond interface{}, obj interface{}) common.ErrorCode {
-	status := common.NewSuccCode()
+func QueryObject(cond interface{}, obj interface{}) error {
 	res := Storage.db.Where(cond).First(obj)
 	if res.Error == gorm.ErrRecordNotFound {
-		status.Set(common.ErrRecordNotExist, "record not exist")
+		return common.NewErrorCode(common.ErrRecordNotExist, "record not exist")
 	} else if res.Error != nil {
-		status.Set(common.ErrSystem, "query record failed")
+		return common.NewErrorCode(common.ErrSystem, "query record failed")
 	}
-	return status
+	return nil
 }
 
-func CreateObject(obj interface{}) common.ErrorCode {
-	status := common.NewSuccCode()
+func CreateObject(obj interface{}) error {
 	res := Storage.db.Create(obj)
 	if res.RowsAffected == 0 {
-		status.Set(common.ErrDbDupKey, "insert dup key")
-		return status
+		return common.NewErrorCode(common.ErrDbDupKey, "insert dup key")
 	}
-	return status
+	return nil
 }
 
-func UpdateObject(cond interface{}, updateField interface{}) common.ErrorCode {
-	status := common.NewSuccCode()
+func UpdateObject(cond interface{}, updateField interface{}) error {
 	res := Storage.db.Model(cond).Updates(updateField)
 	if res.RowsAffected == 0 {
-		status.Set(common.ErrNoAffected, "db update op affected 0 row")
-		return status
+		return common.NewErrorCode(common.ErrNoAffected, "db update op affected 0 row")
 	}
-	return status
+	return nil
 }
 
-func DeleteObject(cond interface{}) common.ErrorCode {
-	status := common.NewSuccCode()
+func DeleteObject(cond interface{}) error {
+
 	res := Storage.db.Model(cond).Delete(cond)
 	if res.RowsAffected == 0 {
-		status.Set(common.ErrNoAffected, "db delete op affected 0 row")
-		return status
+		return common.NewErrorCode(common.ErrNoAffected, "db delete op affected 0 row")
 	}
-	return status
+	return nil
 }

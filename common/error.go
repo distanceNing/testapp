@@ -18,39 +18,57 @@ const (
 )
 
 type ErrorCode struct {
-	code int
-	msg  string
+	Code int
+	Msg  string
+}
+
+func Code(e error) int {
+	if e == nil {
+		return 0
+	}
+	err, ok := e.(*ErrorCode)
+	if !ok {
+		return -1
+	}
+
+	if err == (*ErrorCode)(nil) {
+		return 0
+	}
+	return int(err.Code)
+}
+
+func Msg(e error) string {
+	if e == nil {
+		return "ok"
+	}
+	err, ok := e.(*ErrorCode)
+	if !ok {
+		return "ok"
+	}
+
+	if err == (*ErrorCode)(nil) {
+		return "ok"
+	}
+	return string(err.Msg)
 }
 
 func (s *ErrorCode) Error() string {
-	return s.msg
+	return s.Msg
 }
 
-func NewSuccCode() ErrorCode {
-	return ErrorCode{0, "ok"}
+func NewSuccCode() error {
+	return &ErrorCode{0, "ok"}
 }
 
-func NewErrorCode(code int, msg string) ErrorCode {
-	return ErrorCode{code, msg}
+func NewErrorCode(code int, msg string) error {
+	return &ErrorCode{code, msg}
 }
 
 func (s *ErrorCode) Ok() bool {
-	return s.code == 0
-}
-
-func (s *ErrorCode) Code() int {
-	return s.code
-}
-
-func (s *ErrorCode) Msg() string {
-	return s.msg
+	return s.Code == 0
 }
 
 func (s *ErrorCode) Set(code int, msg string) {
-	s.code = code
-	s.msg = msg
+	s.Code = code
+	s.Msg = msg
 }
-
-//func GetCode(err error) int {
-//	errcode := err.(ErrorCode)
-//}

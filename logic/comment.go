@@ -52,18 +52,14 @@ type CommentReply struct {
 type ArticleComment struct {
 }
 
-func (mgr *CommentManger) CreateComment(req *CreateCommentReq, rsp *common.Rsp) common.ErrorCode {
-	status := common.NewSuccCode()
-
-	return status
+func (mgr *CommentManger) CreateComment(req *CreateCommentReq, rsp *common.Rsp) error {
+	return nil
 }
 
-func (mgr *CommentManger) CreateCommentReply(req *CommentReplyReq, rsp *common.Rsp) common.ErrorCode {
-	status := common.NewSuccCode()
-	return status
+func (mgr *CommentManger) CreateCommentReply(req *CommentReplyReq, rsp *common.Rsp) error {
+	return nil
 }
 
-func (mgr *CommentManger) GetCommentReply(req *GetCommentReplyReq, rsp *common.Rsp) common.ErrorCode {
-	status := common.NewSuccCode()
-	return status
+func (mgr *CommentManger) GetCommentReply(req *GetCommentReplyReq, rsp *common.Rsp) error {
+	return nil
 }

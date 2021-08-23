@@ -38,13 +38,11 @@ type ServerConf struct {
 	RedisConf   RedisConf   `yaml:"redisconf"`
 }
 
-func ReadConf(confPath string) (common.ErrorCode, *ServerConf) {
-	status := common.NewSuccCode()
+func ReadConf(confPath string) (error, *ServerConf) {
 	f, err := os.Open(confPath)
 	if err != nil {
 		log.Println(err.Error())
-		status.Set(-1, "open file : "+err.Error())
-		return status, nil
+		return common.NewErrorCode(-1, "open file : "+err.Error()), nil
 	}
 
 	decoder := yaml.NewDecoder(f)
@@ -52,10 +50,7 @@ func ReadConf(confPath string) (common.ErrorCode, *ServerConf) {
 	err = decoder.Decode(SvrConf)
 	if err != nil {
 		log.Println(err.Error())
-		status.Set(-1, "decode failed ,"+err.Error())
-		return status, nil
+		return common.NewErrorCode(-1, "decode failed ,"+err.Error()), nil
 	}
-
-	log.Println(SvrConf)
-	return status, SvrConf
+	return nil, SvrConf
 }

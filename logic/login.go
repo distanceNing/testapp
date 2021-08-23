@@ -28,48 +28,46 @@ func NewLoginService(conf *conf.RedisConf) *LoginService {
 }
 
 // Login
-func (loginSvc *LoginService) Register(req *LoginRequest, rsp *common.Rsp) common.ErrorCode {
-	status, _ := repo.QueryUserInfo(req.UserId)
-	if status.Ok() {
-		status.Set(common.ErrUserAlreadyExist, "user already exist")
-		return status
-	} else if status.Code() != common.ErrUserNotExist {
-		return status
+func (loginSvc *LoginService) Register(req *LoginRequest, rsp *common.Rsp) error {
+	err, _ := repo.QueryUserInfo(req.UserId)
+	if err != nil {
+		return common.NewErrorCode(common.ErrUserAlreadyExist, "user already exist")
+	} else if common.Code(err) != common.ErrUserNotExist {
+		return err
 	}
-	status = repo.CreateObject(&repo.UserInfo{UserId: req.UserId, NickName: req.NickName, UserType: UserTypeMap[req.UserType],
+	err = repo.CreateObject(&repo.UserInfo{UserId: req.UserId, NickName: req.NickName, UserType: UserTypeMap[req.UserType],
 		UserPassword: req.Password, Email: req.Email, CreatedAt: time.Now(), UpdatedAt: time.Now()})
-	if !status.Ok() {
-		return status
+	if err != nil {
+		return err
 	}
-	return status
+	return err
 }
 
 // Login
-func (loginSvc *LoginService) Login(req *LoginRequest, rsp *common.Rsp) common.ErrorCode {
-	status, userInfo := repo.QueryUserInfo(req.UserId)
-	if !status.Ok() {
-		return status
+func (loginSvc *LoginService) Login(req *LoginRequest, rsp *common.Rsp) error {
+	err, userInfo := repo.QueryUserInfo(req.UserId)
+	if err != nil {
+		return err
 	}
 	if userInfo.UserPassword != req.Password {
-		status.Set(common.ErrPasswordNotMatch, "user password not match")
-		return status
+		return common.NewErrorCode(common.ErrPasswordNotMatch, "user password not match")
 	}
 	var token string
-	status, token = loginSvc.sessionMgr.CreateSession(req.UserId)
-	if !status.Ok() {
-		return status
+	err, token = loginSvc.sessionMgr.CreateSession(req.UserId)
+	if err != nil {
+		return err
 	}
 	rsp.Set("token", token)
-	return status
+	return err
 }
 
-func (loginSvc *LoginService) CheckSessionToken(userId string, token string) common.ErrorCode {
-	status, tokenInSvr := loginSvc.sessionMgr.QuerySessionToken(userId)
-	if !status.Ok() {
-		return status
+func (loginSvc *LoginService) CheckSessionToken(userId string, token string) error {
+	err, tokenInSvr := loginSvc.sessionMgr.QuerySessionToken(userId)
+	if err != nil {
+		return err
 	}
 	if token != tokenInSvr {
-		status.Set(common.ErrTokenNotMatch, "req token not match in svr")
+		return common.NewErrorCode(common.ErrTokenNotMatch, "req token not match in svr")
 	}
-	return status
+	return err
 }

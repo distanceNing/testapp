@@ -23,47 +23,45 @@ type GetImageReq struct {
 	PageCount int
 }
 
-func (mgr *ImageManager) Upload(req *UploadImageReq, rsp *common.Rsp) common.ErrorCode {
+func (mgr *ImageManager) Upload(req *UploadImageReq, rsp *common.Rsp) error {
 	id := mgr.idGenerator.NextVal()
-	s := repo.CreateObject(repo.ImageInfo{id, req.BelongTo, req.Url})
-	if !s.Ok() {
-		return s
+	err:= repo.CreateObject(repo.ImageInfo{id, req.BelongTo, req.Url})
+	if err != nil {
+		return err
 	}
 	rsp.Set("id", id)
 	rsp.Set("url", req.Url)
-	return s
+	return nil
 }
 
-func (mgr *ImageManager) GetImages(req *GetImageReq, rsp *common.Rsp) common.ErrorCode {
+func (mgr *ImageManager) GetImages(req *GetImageReq, rsp *common.Rsp) error {
 	cond := &repo.ImageInfo{}
 	var totalCnt int64
-	status := repo.QueryObjectCount(cond, &totalCnt)
-	if !status.Ok() {
-		return status
+	err:= repo.QueryObjectCount(cond, &totalCnt)
+	if err != nil {
+		return err
 	}
 
 	var objs []repo.ImageInfo
-	repo.QueryObjectByPage(cond, &objs, req.PageCount, req.PageNum)
-	if status.Code() == common.ErrRecordNotExist {
-		status.Set(common.ErrRecordNotExist, "images not exist")
-		return status
-	} else if !status.Ok() {
-		status.Set(common.ErrSystem, "query filed")
-		return status
+	err = repo.QueryObjectByPage(cond, &objs, req.PageCount, req.PageNum)
+	if common.Code(err) == common.ErrRecordNotExist {
+		return common.NewErrorCode(common.ErrRecordNotExist, "imageerrnot exist")
+	} else if err != nil {
+		return common.NewErrorCode(common.ErrSystem, "query filed")
 	}
 
 	type ImageInfo struct {
 		Id  int64  `json:"id"`
 		Url string `json:"url"`
 	}
-	var rspObjs []ImageInfo
-	for i := range objs {
-		rspObjs = append(rspObjs, ImageInfo{objs[i].Id, objs[i].Url})
+	var rspObjs[]ImageInfo
+	for i := range objs{
+		rspObjs= append(rspObjs, ImageInfo{objs[i].Id, objs[i].Url})
 	}
 
 	rsp.Set("total_count", totalCnt)
 	rsp.Set("page", req.PageNum)
 	rsp.Set("per_page_count", req.PageCount)
 	rsp.Set("results", rspObjs)
-	return status
+	return nil
 }
