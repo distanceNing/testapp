@@ -2,6 +2,8 @@ package main
 
 import (
 	"github.com/distanceNing/testapp/common/statemachine"
+	"github.com/distanceNing/testapp/conf"
+	"github.com/distanceNing/testapp/repo"
 	"log"
 )
 
@@ -31,7 +33,8 @@ func DoS3(req interface{}, rsp interface{}, ext map[string]interface{}) (statema
 
 func flowTest() {
 	sm := statemachine.NewStateMachine()
-	sm.AddState([]*statemachine.StateNode{statemachine.NewStateNode(s1, DoS1), statemachine.NewStateNode(s2, DoS2),
+	sm.AddState([]*statemachine.StateNode{statemachine.NewStateNode(s1, DoS1),
+		statemachine.NewStateNode(s2, DoS2),
 		statemachine.NewStateNode(s3, DoS3)})
 	sm.SetBeginState(s1)
 	sm.SetEndState(s4)
@@ -41,19 +44,19 @@ func flowTest() {
 }
 
 func main() {
-	flowTest()
-	//err, svrConf := conf.ReadConf(confFilePath)
-	//if err != nil {
-	//	return
-	//}
-	//err = repo.InitStorage(&svrConf.DbConf)
-	//if err != nil {
-	//	return
-	//}
-	//svr := NewHttpSvr(svrConf)
-	//err = svr.Run(svrConf.AppConf.Addr)
-	//if err != nil {
-	//	log.Println(err.Error())
-	//	return
-	//}
+	//flowTest()
+	err, svrConf := conf.ReadConf(confFilePath)
+	if err != nil {
+		return
+	}
+	err = repo.InitStorage(&svrConf.DbConf)
+	if err != nil {
+		return
+	}
+	svr := NewHttpSvr(svrConf)
+	err = svr.Run(svrConf.AppConf.Addr)
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
 }

@@ -31,7 +31,7 @@ func (mgr *ImageManager) Upload(req *UploadImageReq, rsp *types.Rsp) error {
 	if err != nil {
 		return err
 	}
-	rsp.Set("idgenerator", id)
+	rsp.Set("id", id)
 	rsp.Set("url", req.Url)
 	return nil
 }
@@ -53,7 +53,7 @@ func (mgr *ImageManager) GetImages(req *GetImageReq, rsp *types.Rsp) error {
 	}
 
 	type ImageInfo struct {
-		Id  int64  `json:"idgenerator"`
+		Id  int64  `json:"id"`
 		Url string `json:"url"`
 	}
 	var rspObjs []ImageInfo

@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/distanceNing/testapp/common"
+	"github.com/distanceNing/testapp/common/errcode"
 	"github.com/distanceNing/testapp/common/types"
 	"github.com/distanceNing/testapp/conf"
 	"github.com/distanceNing/testapp/logic"
@@ -37,7 +37,7 @@ func decodeBody(body io.Reader, v interface{}) error {
 	err := decoder.Decode(v)
 	if err != nil {
 		log.Println(err.Error())
-		return common.NewErrorCode(common.ErrJsonDecodeFail, "json decode failed")
+		return errcode.NewErrorCode(errcode.ErrJsonDecodeFail, "json decode failed")
 	}
 	return nil
 }
@@ -57,8 +57,8 @@ func getParamToInt(c *gin.Context, key string, val *int) error {
 }
 
 func (svr *HttpSvr) constructResponse(c *gin.Context, rsp *types.Rsp, err error) {
-	rsp.Set("ret", common.Code(err))
-	rsp.Set("msg", common.Msg(err))
+	rsp.Set("ret", errcode.Code(err))
+	rsp.Set("msg", errcode.Msg(err))
 	c.JSON(200, rsp.GetV())
 }
 
@@ -93,23 +93,23 @@ func (svr *HttpSvr) initRouter() {
 		svr.constructResponse(c, rsp, err)
 	})
 
-	svr.engine.GET("/articles/get/:idgenerator", func(c *gin.Context) {
+	svr.engine.GET("/articles/get/:id", func(c *gin.Context) {
 		rsp := types.NewRsp()
-		req := logic.GetArticleReq{Id: c.Params.ByName("idgenerator")}
+		req := logic.GetArticleReq{Id: c.Params.ByName("id")}
 		err := svr.svc.GetArticle(&req, rsp)
 		svr.constructResponse(c, rsp, err)
 	})
 
-	svr.engine.DELETE("/articles/:idgenerator", func(c *gin.Context) {
+	svr.engine.DELETE("/articles/:id", func(c *gin.Context) {
 		rsp := types.NewRsp()
-		req := logic.DeleteArticleReq{Id: c.Params.ByName("idgenerator")}
+		req := logic.DeleteArticleReq{Id: c.Params.ByName("id")}
 		err := svr.svc.DeleteArticle(&req, rsp)
 		svr.constructResponse(c, rsp, err)
 	})
 
-	svr.engine.PUT("/articles/:idgenerator", func(c *gin.Context) {
+	svr.engine.PUT("/articles/:id", func(c *gin.Context) {
 		rsp := types.NewRsp()
-		req := logic.UpdateArticleReq{Id: c.Params.ByName("idgenerator")}
+		req := logic.UpdateArticleReq{Id: c.Params.ByName("id")}
 		err := decodeBody(c.Request.Body, &req)
 		if err != nil {
 			err = svr.svc.UpdateArticle(&req, rsp)
@@ -148,7 +148,6 @@ func (svr *HttpSvr) initRouter() {
 	})
 
 	svr.engine.POST("/upload", func(c *gin.Context) {
-		err := common.NewSuccCode()
 		rsp := types.NewRsp()
 		file, err := c.FormFile("image")
 		if err != nil {
@@ -159,7 +158,7 @@ func (svr *HttpSvr) initRouter() {
 			req := &logic.UploadImageReq{Url: svr.conf.AppConf.CdnPath + "/image/" + file.Filename, BelongTo: "xxx"}
 			err = svr.svc.Upload(req, rsp)
 		} else {
-			err = common.NewErrorCode(common.ErrRequest, "save file failed")
+			err = errcode.NewErrorCode(errcode.ErrRequest, "save file failed")
 		}
 		svr.constructResponse(c, rsp, err)
 	})

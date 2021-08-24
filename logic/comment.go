@@ -33,7 +33,7 @@ type GetCommentReplyReq struct {
 }
 
 type CommentInfo struct {
-	Id          int64  `json:"idgenerator"`
+	Id          int64  `json:"id"`
 	ArticleId   int64  `gorm:"index"` // 属于那个作品
 	PublisherId string `gorm:"index"`
 	Content     string

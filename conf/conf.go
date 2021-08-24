@@ -1,7 +1,7 @@
 package conf
 
 import (
-	"github.com/distanceNing/testapp/common"
+	"github.com/distanceNing/testapp/common/errcode"
 	"gopkg.in/yaml.v2"
 	"log"
 	"os"
@@ -42,7 +42,7 @@ func ReadConf(confPath string) (error, *ServerConf) {
 	f, err := os.Open(confPath)
 	if err != nil {
 		log.Println(err.Error())
-		return common.NewErrorCode(-1, "open file : "+err.Error()), nil
+		return errcode.NewErrorCode(-1, "open file : "+err.Error()), nil
 	}
 
 	decoder := yaml.NewDecoder(f)
@@ -50,7 +50,7 @@ func ReadConf(confPath string) (error, *ServerConf) {
 	err = decoder.Decode(SvrConf)
 	if err != nil {
 		log.Println(err.Error())
-		return common.NewErrorCode(-1, "decode failed ,"+err.Error()), nil
+		return errcode.NewErrorCode(-1, "decode failed ,"+err.Error()), nil
 	}
 	return nil, SvrConf
 }

@@ -61,7 +61,7 @@ type UpdateArticleReq struct {
 }
 
 type ChannelInfo struct {
-	Id   int    `json:"idgenerator"`
+	Id   int    `json:"id"`
 	Name string `json:"name"`
 }
 
@@ -104,7 +104,7 @@ func (mgr *ArticleManager) SearchArticle(req *GetArticlePageReq, rsp *types.Rsp)
 func (mgr *ArticleManager) GetArticle(req *GetArticleReq, rsp *types.Rsp) error {
 	id, err := strconv.Atoi(req.Id)
 	if err != nil {
-		return errcode.NewErrorCode(errcode.ErrRequest, "idgenerator to int failed")
+		return errcode.NewErrorCode(errcode.ErrRequest, "id to int failed")
 	}
 	obj := repo.ArticleInfo{}
 	err = repo.QueryObject(&repo.ArticleInfo{Id: id}, &obj)
@@ -115,7 +115,7 @@ func (mgr *ArticleManager) GetArticle(req *GetArticleReq, rsp *types.Rsp) error 
 	}
 
 	type ArticleInfo struct {
-		Id        int       `json:"idgenerator"`
+		Id        int       `json:"id"`
 		ChannelId int       `json:"channel_id"`
 		Title     string    `json:"title"`
 		Content   string    `json:"content"`
@@ -147,7 +147,7 @@ func (mgr *ArticleManager) CreateArticle(req *CreateArticleReq, rsp *types.Rsp) 
 func (mgr *ArticleManager) DeleteArticle(req *DeleteArticleReq, rsp *types.Rsp) error {
 	id, err := strconv.Atoi(req.Id)
 	if err != nil {
-		return errcode.NewErrorCode(errcode.ErrRequest, "idgenerator to int failed")
+		return errcode.NewErrorCode(errcode.ErrRequest, "id to int failed")
 	}
 	err = repo.DeleteObject(&repo.ArticleInfo{Id: id})
 	return err
@@ -156,7 +156,7 @@ func (mgr *ArticleManager) DeleteArticle(req *DeleteArticleReq, rsp *types.Rsp) 
 func (mgr *ArticleManager) UpdateArticle(req *UpdateArticleReq, rsp *types.Rsp) error {
 	id, err := strconv.Atoi(req.Id)
 	if err != nil {
-		return errcode.NewErrorCode(errcode.ErrRequest, "idgenerator to int failed")
+		return errcode.NewErrorCode(errcode.ErrRequest, "id to int failed")
 	}
 	updateField := &repo.ArticleInfo{}
 	if req.Status != 0 {

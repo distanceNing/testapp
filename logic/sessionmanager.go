@@ -37,13 +37,15 @@ func (mgr *SessionManager) QuerySessionToken(userId string) (error, string) {
 func (mgr *SessionManager) CreateSession(userId string) (error, string) {
 	ctx := context.Background()
 	token := mgr.genLoginToken()
-	s := "local val = redis.call('GET', KEYS[1])             \n" +
-		"if val == nil or val == false then                  \n" +
-		"    redis.call('SETEX', KEYS[1], ARGV[2] , ARGV[1]) \n" +
-		"    return ARGV[1]                                  \n" +
-		"else                                                \n" +
-		"    return val                                      \n" +
-		"end                                                 \n"
+	s := `
+			local val = redis.call('GET', KEYS[1])
+			if val == nil or val == false then                  
+				redis.call('SETEX', KEYS[1], ARGV[2] , ARGV[1]) 
+				return ARGV[1]                                
+			else                                               
+				return val                                      
+			end                                                 
+		`
 	res := mgr.redisCli.RedisCli.Eval(ctx, s, []string{userId}, token, TokenTimeOut)
 	if res.Err() != nil {
 		return errcode.NewErrorCode(errcode.ErrSystem, res.Err().Error()), ""

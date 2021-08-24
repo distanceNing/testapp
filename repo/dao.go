@@ -1,7 +1,7 @@
 package repo
 
 import (
-	"github.com/distanceNing/testapp/common"
+	"github.com/distanceNing/testapp/common/errcode"
 	"gorm.io/gorm"
 	"log"
 	"time"
@@ -38,9 +38,9 @@ type ImageInfo struct {
 func QueryObjectByPage(cond interface{}, objs interface{}, pageCount int, pageNum int) error {
 	res := Storage.db.Limit(pageCount).Offset(pageCount * (pageNum - 1)).Where(cond).Find(objs)
 	if res.Error == gorm.ErrRecordNotFound {
-		return common.NewErrorCode(common.ErrRecordNotExist, "record not exist")
+		return errcode.NewErrorCode(errcode.ErrRecordNotExist, "record not exist")
 	} else if res.Error != nil {
-		return common.NewErrorCode(common.ErrSystem, "query record failed")
+		return errcode.NewErrorCode(errcode.ErrSystem, "query record failed")
 	}
 	return nil
 }
@@ -48,10 +48,10 @@ func QueryObjectByPage(cond interface{}, objs interface{}, pageCount int, pageNu
 func QueryObjectCount(cond interface{}, count *int64) error {
 	res := Storage.db.Model(cond).Where(cond).Count(count)
 	if res.Error == gorm.ErrRecordNotFound {
-		return common.NewErrorCode(common.ErrRecordNotExist, "record not exist")
+		return errcode.NewErrorCode(errcode.ErrRecordNotExist, "record not exist")
 	} else if res.Error != nil {
 		log.Println(res.Error.Error())
-		return common.NewErrorCode(common.ErrSystem, "query record failed")
+		return errcode.NewErrorCode(errcode.ErrSystem, "query record failed")
 	}
 	return nil
 }
@@ -60,9 +60,9 @@ func QueryUserInfo(userId string) (error, UserInfo) {
 	var userInfo UserInfo
 	res := Storage.db.Where(&UserInfo{UserId: userId}).First(&userInfo)
 	if res.Error == gorm.ErrRecordNotFound {
-		return common.NewErrorCode(common.ErrUserNotExist, "user not exist"), userInfo
+		return errcode.NewErrorCode(errcode.ErrUserNotExist, "user not exist"), userInfo
 	} else if res.Error != nil {
-		return common.NewErrorCode(common.ErrSystem, "query user failed"), userInfo
+		return errcode.NewErrorCode(errcode.ErrSystem, "query user failed"), userInfo
 	}
 	return nil, userInfo
 }
@@ -70,9 +70,9 @@ func QueryUserInfo(userId string) (error, UserInfo) {
 func QueryObject(cond interface{}, obj interface{}) error {
 	res := Storage.db.Where(cond).First(obj)
 	if res.Error == gorm.ErrRecordNotFound {
-		return common.NewErrorCode(common.ErrRecordNotExist, "record not exist")
+		return errcode.NewErrorCode(errcode.ErrRecordNotExist, "record not exist")
 	} else if res.Error != nil {
-		return common.NewErrorCode(common.ErrSystem, "query record failed")
+		return errcode.NewErrorCode(errcode.ErrSystem, "query record failed")
 	}
 	return nil
 }
@@ -80,7 +80,7 @@ func QueryObject(cond interface{}, obj interface{}) error {
 func CreateObject(obj interface{}) error {
 	res := Storage.db.Create(obj)
 	if res.RowsAffected == 0 {
-		return common.NewErrorCode(common.ErrDbDupKey, "insert dup key")
+		return errcode.NewErrorCode(errcode.ErrDbDupKey, "insert dup key")
 	}
 	return nil
 }
@@ -88,7 +88,7 @@ func CreateObject(obj interface{}) error {
 func UpdateObject(cond interface{}, updateField interface{}) error {
 	res := Storage.db.Model(cond).Updates(updateField)
 	if res.RowsAffected == 0 {
-		return common.NewErrorCode(common.ErrNoAffected, "db update op affected 0 row")
+		return errcode.NewErrorCode(errcode.ErrNoAffected, "db update op affected 0 row")
 	}
 	return nil
 }
@@ -97,7 +97,7 @@ func DeleteObject(cond interface{}) error {
 
 	res := Storage.db.Model(cond).Delete(cond)
 	if res.RowsAffected == 0 {
-		return common.NewErrorCode(common.ErrNoAffected, "db delete op affected 0 row")
+		return errcode.NewErrorCode(errcode.ErrNoAffected, "db delete op affected 0 row")
 	}
 	return nil
 }
