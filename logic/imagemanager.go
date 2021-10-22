@@ -2,21 +2,25 @@ package logic
 
 import (
 	"github.com/distanceNing/testapp/common/errcode"
+	"github.com/distanceNing/testapp/common/filestore"
 	"github.com/distanceNing/testapp/common/idgenerator"
 	"github.com/distanceNing/testapp/common/types"
 	"github.com/distanceNing/testapp/repo"
+	"io"
 )
 
 type ImageManager struct {
 	idGenerator *idgenerator.Snowflake
+	store       filestore.FileStore
 }
 
 func NewImageManager() *ImageManager {
-	return &ImageManager{idGenerator: &idgenerator.Snowflake{}}
+	return &ImageManager{idGenerator: &idgenerator.Snowflake{}, store: filestore.MakeFileStore(filestore.CosStore)}
 }
 
 type UploadImageReq struct {
-	Url      string
+	Filename string
+	R        io.Reader
 	BelongTo string
 }
 type GetImageReq struct {
@@ -26,13 +30,17 @@ type GetImageReq struct {
 }
 
 func (mgr *ImageManager) Upload(req *UploadImageReq, rsp *types.Rsp) error {
-	id := mgr.idGenerator.NextVal()
-	err := repo.CreateObject(repo.ImageInfo{id, req.BelongTo, req.Url})
+	url, err := mgr.store.Put(req.Filename, req.R)
 	if err != nil {
 		return err
 	}
+	id := mgr.idGenerator.NextVal()
+	//err = repo.CreateObject(repo.ImageInfo{id, req.BelongTo, url})
+	//if err != nil {
+	//	return err
+	//}
 	rsp.Set("id", id)
-	rsp.Set("url", req.Url)
+	rsp.Set("url", url)
 	return nil
 }
 

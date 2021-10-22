@@ -58,5 +58,8 @@ func (e *Executor) do(cur State, sm *StateMachine, req interface{}, rsp interfac
 	err := sm.Run(&cur, req, rsp)
 	if err != nil && errcode.Code(err) == errcode.ErrNeedRetry {
 		e.constructRetryMessage(cur, sm, e)
+		return
 	}
+
+	// TODO XXX
 }

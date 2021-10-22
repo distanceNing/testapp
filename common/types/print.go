@@ -2,7 +2,9 @@ package types
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
 	"reflect"
+	"strings"
 )
 
 func PrintStruct(t interface{}) {
@@ -15,16 +17,35 @@ func PrintStruct(t interface{}) {
 	}
 }
 
-func Convent(src interface{}, dest interface{}) {
+type Options struct {
+	IgnoreCase bool
+}
+
+func Convent(src interface{}, dest interface{}, opts *Options) error {
 	srcVal := reflect.ValueOf(src).Elem()
 	srcType := srcVal.Type()
 	destVal := reflect.ValueOf(dest).Elem()
 	destType := destVal.Type()
+	if srcType.Kind() != reflect.Struct || destType.Kind() != reflect.Struct {
+		return errors.New("only support struct type")
+	}
+
 	for i := 0; i < srcVal.NumField(); i++ {
 		for j := 0; j < destVal.NumField(); j++ {
-			if srcType.Field(i).Name == destType.Field(j).Name {
-				destVal.Field(j).Set(srcVal.Field(i))
+			//if destVal.Field(j).Type() != srcVal.Field(i).Type() {
+			//	continue
+			//}
+			name1 := srcType.Field(i).Name
+			name2 := destType.Field(j).Name
+			if opts != nil && opts.IgnoreCase {
+				name1 = strings.ToUpper(name1)
+				name2 = strings.ToUpper(name2)
+			}
+			if name1 == name2 {
+				v := srcVal.Field(i).Convert(destVal.Field(j).Type())
+				destVal.Field(j).Set(v)
 			}
 		}
 	}
+	return nil
 }

@@ -13,6 +13,18 @@ type SessionManager struct {
 	redisCli *repo.RedisInstance
 }
 
+const (
+	SetSessionKeyScript = `
+			local val = redis.call('GET', KEYS[1])
+			if val == nil or val == false then                  
+				redis.call('SETEX', KEYS[1], ARGV[2] , ARGV[1]) 
+				return ARGV[1]                                
+			else                                               
+				return val                                      
+			end                                                 
+		`
+)
+
 func NewSessionManager(conf *conf.RedisConf) *SessionManager {
 	return &SessionManager{redisCli: repo.NewRedisInstance(conf)}
 }
@@ -37,16 +49,8 @@ func (mgr *SessionManager) QuerySessionToken(userId string) (error, string) {
 func (mgr *SessionManager) CreateSession(userId string) (error, string) {
 	ctx := context.Background()
 	token := mgr.genLoginToken()
-	s := `
-			local val = redis.call('GET', KEYS[1])
-			if val == nil or val == false then                  
-				redis.call('SETEX', KEYS[1], ARGV[2] , ARGV[1]) 
-				return ARGV[1]                                
-			else                                               
-				return val                                      
-			end                                                 
-		`
-	res := mgr.redisCli.RedisCli.Eval(ctx, s, []string{userId}, token, TokenTimeOut)
+
+	res := mgr.redisCli.RedisCli.Eval(ctx, SetSessionKeyScript, []string{userId}, token, TokenTimeOut)
 	if res.Err() != nil {
 		return errcode.NewErrorCode(errcode.ErrSystem, res.Err().Error()), ""
 	}

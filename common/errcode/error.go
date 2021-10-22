@@ -43,7 +43,7 @@ func Msg(e error) string {
 	}
 	err, ok := e.(*ErrorCode)
 	if !ok {
-		return "ok"
+		return e.Error()
 	}
 
 	if err == (*ErrorCode)(nil) {

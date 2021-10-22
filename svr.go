@@ -154,11 +154,10 @@ func (svr *HttpSvr) initRouter() {
 			svr.constructResponse(c, rsp, err)
 			return
 		}
-		if err := c.SaveUploadedFile(file, svr.conf.AppConf.ImagePath+"image/"+file.Filename); err == nil {
-			req := &logic.UploadImageReq{Url: svr.conf.AppConf.CdnPath + "/image/" + file.Filename, BelongTo: "xxx"}
+		x, err := file.Open()
+		if err == nil {
+			req := &logic.UploadImageReq{Filename: file.Filename, R: x, BelongTo: "xxx"}
 			err = svr.svc.Upload(req, rsp)
-		} else {
-			err = errcode.NewErrorCode(errcode.ErrRequest, "save file failed")
 		}
 		svr.constructResponse(c, rsp, err)
 	})
@@ -181,6 +180,11 @@ func (svr *HttpSvr) initRouter() {
 
 	svr.engine.GET("/image/:file", func(c *gin.Context) {
 		fileName := svr.conf.AppConf.ImagePath + c.Request.URL.Path
+		c.File(fileName)
+	})
+
+	svr.engine.GET("/frontend/:file", func(c *gin.Context) {
+		fileName := svr.conf.AppConf.CdnPath + c.Request.URL.Path
 		c.File(fileName)
 	})
 

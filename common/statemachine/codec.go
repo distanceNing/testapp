@@ -37,12 +37,12 @@ type PBRetryMessageCodec struct {
 }
 
 func (pbCodec *PBRetryMessageCodec) Deserialize(data []byte) (*RetryMessage, error) {
-	log.Println("pb codec")
+	log.Println("protocol codec")
 	return NewRetryMessage(), nil
 }
 
 func (pbCodec *PBRetryMessageCodec) Serialize(sm *RetryMessage) ([]byte, error) {
-	log.Println("pb codec")
+	log.Println("protocol codec")
 	return []byte{}, nil
 }
 

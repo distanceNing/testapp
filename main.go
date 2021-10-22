@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/distanceNing/testapp/common/statemachine"
 	"github.com/distanceNing/testapp/conf"
-	"github.com/distanceNing/testapp/repo"
 	"log"
 )
 
@@ -49,10 +48,10 @@ func main() {
 	if err != nil {
 		return
 	}
-	err = repo.InitStorage(&svrConf.DbConf)
-	if err != nil {
-		return
-	}
+	//err = repo.InitStorage(&svrConf.DbConf)
+	//if err != nil {
+	//	return
+	//}
 	svr := NewHttpSvr(svrConf)
 	err = svr.Run(svrConf.AppConf.Addr)
 	if err != nil {
