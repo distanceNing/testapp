@@ -1,0 +1,11 @@
+syntax = "proto3";
+package proto;
+option go_package = "./;pb";
+
+message LoginRequest {
+  string user_id = 1;
+  string password = 2;
+  string user_type = 3;
+  string email = 4;
+  string nickname = 5;
+}
