@@ -45,7 +45,6 @@ func flowTest() {
 }
 
 func main() {
-	flowTest()
 	svrConf := conf.ServerConf{}
 	err := parser.ParseYamlFile(confFilePath, &svrConf)
 	if err != nil {
